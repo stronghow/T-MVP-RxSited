@@ -1,0 +1,111 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="com.base.util.helper.RouterHelper" />
+
+        <import type="com.base.entity.DataExtra" />
+
+        <import type="com.C" />
+
+        <variable
+            name="item"
+            type="com.model.Tag" />
+    </data>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/card_margin"
+        android:foreground="?attr/selectableItemBackground"
+        android:onClick="@{()->RouterHelper.go(C.BOOK1,DataExtra.getExtra(C.MODEL,item),image)}"
+        android:paddingLeft="8dp"
+        android:background="?attr/backgroundCard"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/backgroundCard"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <LinearLayout
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/image"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:scaleType="centerCrop"
+                    app:imageUrl="@{item.logo}"
+                    app:refUrl="@{item.url}"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="2"
+                    android:text="@{item.name}"
+                    android:textColor="?attr/textColor"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_author"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:layout_marginTop="4dp"
+                    android:text="@{item.author}"
+                    android:textColor="?attr/textColor"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_newSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{item.newSection}"
+                    android:textColor="?attr/textColor"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:layout_marginTop="4dp"
+                    android:text="@{item.status}"
+                    android:textColor="?attr/textColor"
+                    android:textSize="12sp"/>
+
+                <TextView
+                    android:id="@+id/tv_updateTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@{item.updateTime}"
+                    android:textColor="?attr/textColor"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+</layout>

@@ -1,0 +1,31 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="item"
+            type="com.model.Hots" />
+    </data>
+    <android.support.v7.widget.CardView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_margin="@dimen/card_margin"
+        android:foreground="?attr/selectableItemBackground"
+        android:background="?attr/backgroundCard">
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            />
+        <TextView
+            android:id="@+id/tv_article"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:lineSpacingExtra="10dp"
+            android:textColor="?attr/textColor"
+            android:padding="10dp"
+            android:text="@{item.name}"
+            />
+    </android.support.v7.widget.CardView>
+</layout>
