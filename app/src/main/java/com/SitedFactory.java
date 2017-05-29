@@ -115,42 +115,6 @@ public class SitedFactory {
      * @return Observable
      */
     public static Observable<List<Tags>> getTags(HashMap<String, Object> param){
-//        return Observable.fromPublisher(new Flowable<DataArr>() {
-//            @Override
-//            protected void subscribeActual(org.reactivestreams.Subscriber<? super DataArr> s) {
-//                DdSource source = (DdSource) param.get(C.SOURCE);
-//                String url = (String)param.get(C.URL);
-//                if(source == null){
-//                    source = SourceApi.getByUrl(url);
-//                    if(source == null) {
-//                        s.onNext(new DataArr());
-//                        s.onComplete();
-//                    }
-//                }
-//
-//                MainViewModel viewModel = new MainViewModel();
-//                source.getNodeViewModel(viewModel, source.home, (boolean) param.get(C.ISUPDATE), new SdSourceCallback() {
-//                    @Override
-//                    public void run(Integer code) {
-//                        if(code == 1){
-//                            DataArr dataArr = new DataArr();
-//                            Tags search = new Tags();
-//                            search.title = "搜索";
-//                            search.url = url+"search";
-//                            search.isSearch = true;
-//                            viewModel.tagList.add(search);
-//                            dataArr.results = viewModel.tagList;
-//                            s.onNext(dataArr);
-//                            s.onComplete();
-//                            Observable.fromIterable(viewModel.tagList)
-//                                    .map(tags -> {tags.QueryKey = url;return tags;})
-//                                    .toList()
-//                                    .subscribe(tagses -> SiteDbApi.insertOrUpdate(tagses));
-//                        }
-//                    }
-//                });
-//            }
-//        }).compose(RxSchedulers.io_main());
 
         PublishSubject mSubject = PublishSubject.create();
         DdSource source = (DdSource) param.get(C.SOURCE);
@@ -191,41 +155,6 @@ public class SitedFactory {
      * @return Observable
      */
     public static Observable getTag(HashMap<String, Object> param){
-//       return Observable.fromPublisher(new Publisher<DataArr>() {
-//            @Override
-//            public void subscribe(Subscriber<? super DataArr> s) {
-//                DdSource source = (DdSource) param.get(C.SOURCE);
-//                Tags model = (Tags) param.get(C.MODEL);
-//                TagViewModel viewModel = new TagViewModel();
-//                DdNode Config;
-//
-//                //tag节点 和 search节点 的 model 是一样的
-//                if(model.isSearch)
-//                    Config  = source.search;
-//                else
-//                    Config = source.tag(model.url);
-//
-//                KLog.json("page=" + (int)param.get(C.PAGE));
-//
-//
-//                source.getNodeViewModel(viewModel, false,model.isSearch,(int)param.get(C.PAGE),model.url,Config, new SdSourceCallback() {
-//                    @Override
-//                    public void run(Integer code) {
-//                        if(code == 1){
-//                            DataArr<Tag> data = new DataArr<>();
-//                            KLog.json("size=" + viewModel.resultList.size());
-//                            data.results = viewModel.resultList;
-//                            s.onNext(data);
-//                            s.onComplete();
-//                            Observable.fromIterable(viewModel.resultList)
-//                                    .map(tag -> {tag.QueryKey = model.url + param.get(C.PAGE);return tag;})
-//                                    .toList()
-//                                    .subscribe(tags -> SiteDbApi.insertOrUpdate(tags));
-//                        }
-//                    }
-//                });
-//            }
-//        }).compose(RxSchedulers.io_main());
 
         PublishSubject  mSubject = PublishSubject.create();
         DdSource source = (DdSource) param.get(C.SOURCE);
@@ -266,33 +195,6 @@ public class SitedFactory {
      * @return Observable
      */
     public static Observable getBook(HashMap<String, Object> param){
-//      return   Observable.fromPublisher(new Publisher<DataArr>() {
-//            @Override
-//            public void subscribe(Subscriber<? super DataArr> s) {
-//                Tag model = (Tag) param.get(C.MODEL);
-//                DdSource source = SourceApi.getByUrl(model.url);
-//                C.oldIndex = 0;
-//                if(source == null){
-//                    s.onNext(new DataArr<>());
-//                    s.onComplete();
-//                }else {
-//                    //sited::获取book节点的数据
-//                    Observable.timer(500,TimeUnit.MILLISECONDS)
-//                            .compose(RxSchedulers.io_main())
-//                            .subscribe((t) ->{
-//                                BookViewModel viewModel = new BookViewModel(source, model.url);
-//                                source.getNodeViewModel(viewModel, false, model.url, source.book(model.url), (code) -> {
-//                                    if (code == 1) {
-//                                        //维持正序
-//                                        getBookBy(s,viewModel,model);
-//                                    }
-//                                });
-//                            });
-//                }
-//            }
-//        }).compose(RxSchedulers.io_main());
-
-
         PublishSubject  mSubject = PublishSubject.create();
         KLog.json("进入Observable");
         Tag model = (Tag) param.get(C.MODEL);
@@ -326,12 +228,6 @@ public class SitedFactory {
      * @return Observable
      */
     public static Observable getSection(HashMap<String, Object> param){
-//       return Observable.fromPublisher(new Publisher<DataArr>() {
-//            @Override
-//            public void subscribe(Subscriber<? super DataArr> s) {
-//
-//            }
-//        }).compose(RxSchedulers.io_main());
         PublishSubject mSubject = PublishSubject.create();
         KLog.json("进入Observable");
         Sections model = (Sections) param.get(C.MODEL);
@@ -432,12 +328,5 @@ public class SitedFactory {
      */
     private static Observable Observable_NULL(){
         return Observable.just(new DataArr<>()).compose(RxSchedulers.io_main());
-//        return Observable.create(new ObservableOnSubscribe<DataArr>() {
-//            @Override
-//            public void subscribe(@NonNull ObservableEmitter<DataArr> e) throws Exception {
-//                e.onNext(new DataArr());
-//                e.onComplete();
-//            }
-//        });
     }
 }
