@@ -34,7 +34,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     private CoreAdapter<M> mCommAdapter;
     private AdapterPresenter<M> mCoreAdapterPresenter;
     private HashMap mMap = new HashMap();
-    private boolean isHasHeadView = false, isHasFootView = false, isEmpty = false, isReverse = false;
+    private boolean isHasHeadView = false, isHasFootView = false, isEmpty = false, isReverse = false,isRefreshable = false;
     private int headType, footType, spanCount;
     private int lastVisibleItem,total;
     private SimpleDateFormat ft = new SimpleDateFormat("HH:mm");
@@ -68,7 +68,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         int itemType = ta.getResourceId(R.styleable.TRecyclerView_itemType, 0);
         footType = ta.getResourceId(R.styleable.TRecyclerView_footType, 0);
         isReverse = ta.getBoolean(R.styleable.TRecyclerView_isReverse, false);
-        boolean isRefreshable = ta.getBoolean(R.styleable.TRecyclerView_isRefreshable, true);
+        isRefreshable = ta.getBoolean(R.styleable.TRecyclerView_isRefreshable, true);
         spanCount = ta.getInteger(R.styleable.TRecyclerView_spanCount,1);
         KLog.json("spanCount="+spanCount);
         ta.recycle();
@@ -194,6 +194,12 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     public TRecyclerView<M> setData(List<M> data) {
         reSetEmpty();
         mCommAdapter.setBeans(data, 1);
+        return this;
+    }
+
+    public TRecyclerView<M> setRefreshable(boolean isRefreshable) {
+        this.isRefreshable = isRefreshable;
+        swipeRefresh.setEnabled(isRefreshable);
         return this;
     }
 

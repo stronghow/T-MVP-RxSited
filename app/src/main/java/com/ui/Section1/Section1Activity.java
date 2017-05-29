@@ -12,13 +12,12 @@ import com.C;
 import com.app.annotation.apt.Extra;
 import com.app.annotation.apt.Router;
 import com.base.BaseActivity;
+import com.base.entity.DataExtra;
 import com.dao.db.SiteDbApi;
 import com.model.Sections;
 import com.socks.library.KLog;
 import com.ui.main.R;
 import com.ui.main.databinding.ActivitySitedSectionBinding;
-
-import java.util.HashMap;
 
 /**
  * Created by haozhong on 2017/4/4.
@@ -37,7 +36,6 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
         return R.layout.activity_sited_section;
     }
 
-
     @Override
     public void before_content() {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE); // 隐藏应用程序的标题栏，即当前activity的label
@@ -46,11 +44,9 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
 
     @Override
     public void initView() {
-        HashMap map = new HashMap();
-        map.put(C.MODEL,model);
         mViewBinding.listItem.getTextView().setVisibility(View.VISIBLE);
         mViewBinding.listItem.setHashMap(C.BOOKNAME,model.name);
-        mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(),map);
+        mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(), DataExtra.getExtra(C.MODEL,model));
     }
 
     @Override
@@ -63,6 +59,7 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
         //注册receiver
         registerReceiver(batteryReceiver, intentFilter);
     }
+
 
     protected void onDestroy() {
         KLog.json("onDestroy");

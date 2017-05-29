@@ -9,12 +9,18 @@ import java.util.HashMap;
 public class DataExtra {
     private HashMap<String, Object>  map = new HashMap();
 
+    public DataExtra(){}
+
     public DataExtra(HashMap<String, Object> map) {
         this.map = map;
     }
 
     public DataExtra(String key, Object value) {
         this.map.put(key, value);
+    }
+
+    public static DataExtra create(){
+        return new DataExtra();
     }
 
     public DataExtra add(String key, Object value) {

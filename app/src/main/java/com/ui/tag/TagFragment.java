@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import com.C;
 import com.DbFactory;
 import com.SitedFactory;
+import com.base.adapter.AdapterPresenter;
 import com.base.adapter.TRecyclerView;
 import com.dao.engine.DdSource;
 import com.model.Tags;
@@ -40,14 +41,36 @@ public class TagFragment extends Fragment {
         if(tRecyclerView == null){
             tRecyclerView = new TRecyclerView(getContext());
             tRecyclerView.setViewType(R.layout.sited_tag_item);
-            tRecyclerView.getPresenter()
-                    .setNetRepository(SitedFactory::getTag)
-                    .setDbRepository(DbFactory::getTag)
-                    .setParam(C.SOURCE,source)
-                    .setParam(C.MODEL,model)
-                    .fetch();
+            if(model.isSearch){
+                tRecyclerView.setRefreshable(false);
+                tRecyclerView.getPresenter()
+                        .setNetRepository(SitedFactory::getTag)
+                        .setParam(C.SOURCE,source)
+                        .setParam(C.MODEL,model)
+                        .setBegin(C.NO_MORE)
+                        .fetch();
+            }else{
+                tRecyclerView.getPresenter()
+                        .setNetRepository(SitedFactory::getTag)
+                        .setDbRepository(DbFactory::getTag)
+                        .setParam(C.SOURCE,source)
+                        .setParam(C.MODEL,model)
+                        .fetch();
+            }
         }
         return  tRecyclerView;
+    }
+
+    public AdapterPresenter getPresenter(){
+       return tRecyclerView.getPresenter();
+    }
+
+    public void updateData(String key){
+        model.url = key;
+        tRecyclerView.getPresenter()
+                .setParam(C.MODEL,model)
+                .setBegin(C.NO_MORE)
+                .fetch_Net();
     }
 
     @Override

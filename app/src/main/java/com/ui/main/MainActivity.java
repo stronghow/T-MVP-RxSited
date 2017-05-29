@@ -43,16 +43,14 @@ public class MainActivity extends BaseActivity<MainPresenter,ActivityMainBinding
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mViewBinding.dlMainDrawer, R.string.drawer_open, R.string.drawer_close);
         mDrawerToggle.syncState();
         mViewBinding.dlMainDrawer.addDrawerListener(mDrawerToggle);
-        Intent intent = getIntent();
-        mPresenter.forIntent(intent,false);
+        mPresenter.forIntent(getIntent(),false);
         mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(),null);
-        initEven();
     }
 
     @Override
     public void initEven(){
         mViewBinding.nvMainNavigation.setNavigationItemSelectedListener(this);
-        mViewBinding.fab.setOnClickListener((v)-> {TMVPFragment.getInstance().start(getSupportFragmentManager());});
+        mViewBinding.fab.setOnClickListener((v)-> TMVPFragment.getInstance().start(getSupportFragmentManager()));
 
     }
 

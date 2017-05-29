@@ -10,8 +10,8 @@ import com.socks.library.KLog;
 import java.util.HashMap;
 import java.util.List;
 
+import io.reactivex.disposables.Disposable;
 import io.realm.Realm;
-import rx.Subscription;
 
 /**
  * Created by baixiaokang on 16/12/27.
@@ -29,8 +29,8 @@ public class AdapterPresenter<M> {
     private final IAdapterView<M> view;
     private boolean isCACHE_NETWORK; //缓存和网络一起
     private boolean Refreshing = false;
-    private Subscription mDbSubscription;
-    private Subscription mNetSubscription;
+    private Disposable mDbSubscription;
+    private Disposable mNetSubscription;
 
     interface IAdapterView<M> {
         void setEmpty();
@@ -118,17 +118,13 @@ public class AdapterPresenter<M> {
                                 } else {
                                     Refreshing = false;
                                     KLog.json("setDbData()");
-                                    Realm realm = Realm.getDefaultInstance();
                                     KLog.json("DBlist.size()=" + r.size());
-                                    view.setDBData(realm.copyFromRealm(r), begin);
-                                    if(mDbSubscription != null && !mDbSubscription.isUnsubscribed())
-                                        mDbSubscription.unsubscribe();
+                                    view.setDBData(Realm.getDefaultInstance().copyFromRealm(r), begin);
                                 }
                             },
-                            err -> err.printStackTrace(),
-                            ()-> {
-                                if(mDbSubscription != null && !mDbSubscription.isUnsubscribed())
-                                    mDbSubscription.unsubscribe();
+                            err -> getNetData(),
+                            ()-> { if(mDbSubscription != null && !mDbSubscription.isDisposed())
+                                mDbSubscription.dispose();
                             });
         }
         else {
@@ -148,16 +144,16 @@ public class AdapterPresenter<M> {
                             err -> err.printStackTrace(),
                             ()-> {
                                 Refreshing = false;
-                                if(mNetSubscription != null && !mNetSubscription.isUnsubscribed())
-                                    mNetSubscription.unsubscribe();
+                                if(mNetSubscription != null && !mNetSubscription.isDisposed())
+                                    mNetSubscription.dispose();
                             });
         else view.setNetData(null,begin);
     }
 
     public void unsubscribe(){
-        if(mNetSubscription != null && !mNetSubscription.isUnsubscribed())
-            mNetSubscription.unsubscribe();
-        if(mDbSubscription != null && !mDbSubscription.isUnsubscribed())
-            mDbSubscription.unsubscribe();
+        if(mNetSubscription != null && !mNetSubscription.isDisposed())
+            mNetSubscription.dispose();
+        if(mDbSubscription != null && !mDbSubscription.isDisposed())
+            mDbSubscription.dispose();
     }
 }

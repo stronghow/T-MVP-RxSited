@@ -22,25 +22,38 @@ import org.noear.sited.SdSourceCallback;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import rx.Observable;
-import rx.Subscriber;
-import rx.subjects.PublishSubject;
 
 import static com.C.QueryKey;
 
 /**
+ * @apiNote SiteD 获取本地数据库工厂
  * Created by baixiaokang on 17/1/25.
  */
 
 public class DbFactory {
+
+    /**
+     * @apiNote 获取源码本地数据
+     * @param param
+     * @return Observable
+     */
     public static Observable getSource(HashMap<String, Object> param){
-        return Observable.defer(() -> Realm.getDefaultInstance()
+        return Observable.just(Realm.getDefaultInstance()
                 .where(SourceModel.class)
-                .findAll().asObservable());
+                .findAll()).compose(RxSchedulers.io_main());
     }
 
+
+
+    /**
+     * @apiNote 获取hots节点本地数据
+     * @param param HashMap<String, Object> param
+     * @return Observable
+     */
     public static Observable getHots(HashMap<String, Object> param){
         PublishSubject mSubject = PublishSubject.create();
         KLog.json("进入Observable");
@@ -50,7 +63,7 @@ public class DbFactory {
             if(source == null) {
                 KLog.json("source == null");
                 mSubject.onNext(null);
-                mSubject.onCompleted();
+                mSubject.onComplete();
             }
         }
 
@@ -64,7 +77,7 @@ public class DbFactory {
                     KLog.json("tagList.size:"+viewModel.tagList.size());
                     //OkBus.getInstance().onEvent(EventTags.SHOW_TAG_LIST, viewModel.tagList);
                     mSubject.onNext(data);
-                    mSubject.onCompleted();
+                    mSubject.onComplete();
                 }
             }
         });
@@ -72,50 +85,72 @@ public class DbFactory {
         return mSubject.compose(RxSchedulers.io_main());
     }
 
-    public static Observable getTags(HashMap<String, Object> param){
-        return Observable.defer(() -> Realm.getDefaultInstance()
+    /**
+     * @apiNote 获取tags节点本地数据
+     * @param param HashMap<String, Object> param
+     * @return Observable
+     */
+    public static Observable<RealmResults<Tags>> getTags(HashMap<String, Object> param){
+        return Observable.just(Realm.getDefaultInstance()
                 .where(Tags.class)
                 .equalTo(QueryKey,(String)param.get(C.URL))
-                .findAll().asObservable());
+                .findAll());
     }
 
+
+    /**
+     * @apiNote 获取tag节点本地数据
+     * @param param HashMap<String, Object> param
+     * @return Observable
+     */
     public static Observable getTag(HashMap<String, Object> param){
         KLog.json("getTag=" + ((Tags)param.get(C.MODEL)).url + param.get(C.PAGE));
-        return Observable.defer(()->Realm.getDefaultInstance()
-                .where(Tag.class)
-                .equalTo(QueryKey,((Tags)param.get(C.MODEL)).url + param.get(C.PAGE))
-                .findAll().asObservable());
+        return Observable.just(Realm.getDefaultInstance()
+                        .where(Tag.class)
+                        .equalTo(QueryKey,((Tags)param.get(C.MODEL)).url + param.get(C.PAGE))
+                        .findAll()).compose(RxSchedulers.io_main());
     }
 
+    /**
+     * @apiNote 获取updates节点本地数据
+     * @param param HashMap<String, Object> param
+     * @return Observable
+     */
     public static Observable getUpdates(HashMap<String, Object> param){
-        return Observable.create(new Observable.OnSubscribe<DataArr<Hots>>() {
-            @Override
-            public void call(Subscriber<? super DataArr<Hots>> subscriber) {
-                KLog.json("进入Observable");
-                DdSource source = (DdSource) param.get(C.SOURCE);
-                if(source == null){
-                    source = SourceApi.getByUrl((String)param.get(C.URL));
-                    if(source == null) {
-                        subscriber.onNext(null);
-                        subscriber.onCompleted();
-                    }
-                }
-
-                MainViewModel viewModel = new MainViewModel();
-                source.getNodeViewModel(viewModel, source.home, (boolean) param.get(C.ISUPDATE), new SdSourceCallback() {
-                    @Override
-                    public void run(Integer code) {
-                        if(code == 1){
-                            DataArr<Hots> data = new DataArr<>();
-                            data.results = viewModel.hotList;
-                            subscriber.onNext(data);
-                        }
-                    }
-                });
-            }
-        }).compose(RxSchedulers.io_main());
+//        return Observable.create(new Observable.OnSubscribe<DataArr<Hots>>() {
+//            @Override
+//            public void call(Subscriber<? super DataArr<Hots>> subscriber) {
+//                KLog.json("进入Observable");
+//                DdSource source = (DdSource) param.get(C.SOURCE);
+//                if(source == null){
+//                    source = SourceApi.getByUrl((String)param.get(C.URL));
+//                    if(source == null) {
+//                        subscriber.onNext(null);
+//                        subscriber.onCompleted();
+//                    }
+//                }
+//
+//                MainViewModel viewModel = new MainViewModel();
+//                source.getNodeViewModel(viewModel, source.home, (boolean) param.get(C.ISUPDATE), new SdSourceCallback() {
+//                    @Override
+//                    public void run(Integer code) {
+//                        if(code == 1){
+//                            DataArr<Hots> data = new DataArr<>();
+//                            data.results = viewModel.hotList;
+//                            subscriber.onNext(data);
+//                        }
+//                    }
+//                });
+//            }
+//        }).compose(RxSchedulers.io_main());
+        return null;
     }
 
+    /**
+     * @apiNote 获取book节点本地数据
+     * @param param HashMap<String, Object> param
+     * @return Observable
+     */
     public static Observable getBook(HashMap<String, Object> param){
         Tag model = (Tag)param.get(C.MODEL);
         KLog.json("getBook=" + model.url);
@@ -126,25 +161,26 @@ public class DbFactory {
         if(lookModel != null){
             C.oldIndex = lookModel.index;
         }
-        return Observable.defer(() ->{
-            RealmResults results = Realm.getDefaultInstance()
-                    .where(Sections.class)
-                    .equalTo(QueryKey,model.url)
-                    .findAll();
-            C.sSectionses = (ArrayList<Sections>) Realm.getDefaultInstance().copyFromRealm(results);
-            //C.sSectionses = sectionses;
-            KLog.json("C.sSectionses.size()="+C.sSectionses.size());
-            return results.asObservable();
-        });
+        RealmResults results = Realm.getDefaultInstance()
+                .where(Sections.class)
+                .equalTo(QueryKey,model.url)
+                .findAll();
+        // TODO: 2017/5/20 这里不能修改 容易崩溃
+        C.sSectionses = (ArrayList<Sections>)Realm.getDefaultInstance().copyFromRealm(results);
+
+       return Observable.just(results).compose(RxSchedulers.io_main());
     }
 
+    /**
+     * @apiNote 获取Section节点本地数据
+     * @param param HashMap<String, Object> param
+     * @return Observable
+     */
     public static Observable getSection(HashMap<String, Object> param){
-        PublishSubject mSubject = PublishSubject.create();
         KLog.json("DbFactory::getSection");
         Sections model = (Sections) param.get(C.MODEL);
         int index = model.index;
         int page = (int)param.get(C.PAGE)-1;
-        //sectionses = C.sSectionses;
         KLog.json("page=" + page + " index" + index);
         KLog.json("model=" + model.toString());
         if(index + page == C.sSectionses.size()) { //已经到最底部
@@ -168,35 +204,23 @@ public class DbFactory {
         ((Section1Activity)App.getCurActivity()).mViewBinding.listItem.setHashMap(C.BOOKNAME,model.name);
 
         final String QueryKey = model.url;
-        final Sections mmodel = model;
 
-        Observable.create(new Observable.OnSubscribe<Integer>() {
-            @Override
-            public void call(Subscriber<? super Integer> subscriber) {
-                subscriber.onNext(0);
-                subscriber.onCompleted();
-            }
-        }).compose(RxSchedulers.io_main())
-                .doOnCompleted(()->mSubject.onNext(Realm.getDefaultInstance()
-                        .where(PicModel.class)
-                        .equalTo(C.QueryKey,QueryKey)
-                        .findAll()))
-                .subscribe(integer -> {
-                    //SiteDbApi.updateLastlook(C.sSectionses,mmodel)
-                });
-
-//        return Observable.defer(() -> Realm.getDefaultInstance()
-//                .where(PicModel.class)
-//                .equalTo(C.QueryKey,QueryKey)
-//                .findAll().asObservable());
-
-        return mSubject.compose(RxSchedulers.io_main());
+        return Observable.just(Realm.getDefaultInstance()
+                .where(PicModel.class)
+                .equalTo(C.QueryKey,QueryKey)
+                .findAll()).compose(RxSchedulers.io_main());
     }
 
-    private static Observable Observable_NULL(){
-       return Observable.defer(() -> Realm.getDefaultInstance()
-                .where(PicModel.class)
-                .equalTo(C.QueryKey, "")
-                .findAll().asObservable());
+    /**
+     * @apiNote 获取空本地数据的Observable
+     * @param
+     * @return Observable
+     */
+    private static Observable<RealmResults> Observable_NULL(){
+        // TODO: 2017/5/20  无法解决显示正在加载问题
+        //return null;
+        return Observable.empty();
+//        return Observable.just(Realm.getDefaultInstance().where(LookModel.class).equalTo(C.QueryKey,"").findAll())
+//                         .compose(RxSchedulers.io_main());
     }
 }

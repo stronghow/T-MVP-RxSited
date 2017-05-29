@@ -32,28 +32,6 @@ public class SourceApi {
         return _sourceList.size();
     }
 
-    //
-    public static void tryUpdateAddinsDb() {
-        tryInit();
-
-        if (_sourceList.size() > 0)
-            return;
-
-
-        List<SourceModel> slist = SiteDbApi.getSources(false);
-
-        for (SourceModel m : slist) {
-            if (TextUtils.isEmpty(m.sited) == false) {
-                DdSource sd = loadSource(m.sited, m.cookies, false);
-
-                //更新数据库
-                if (sd != null) {
-                    SiteDbApi.setSourceExpr(sd);
-                }
-            }
-        }
-    }
-
     public static DdSource loadSource(String sited, String cookies, boolean isUpdate) {
 
         //KLog.json(sited);
@@ -124,27 +102,5 @@ public class SourceApi {
         }
 
         return null;
-    }
-
-    public static void tryInitAddins(){
-//        if(Setting.isInitedAddins() == false){
-//            SiteDbApi.addSourceByLocal(new SourceModel(Config.LOCAL_ADDIN_TYPE, "101", "cmd://101", "我的收藏", "功能模块", "noear"));
-//            SiteDbApi.addSourceByLocal(new SourceModel(Config.LOCAL_ADDIN_TYPE, "102", "cmd://102", "历史浏览", "功能模块", "noear"));
-//            SiteDbApi.addSourceByLocal(new SourceModel(Config.LOCAL_ADDIN_TYPE, "105", "cmd://105", "下载管理", "功能模块", "noear"));
-//            SiteDbApi.addSourceByLocal(new SourceModel(Config.LOCAL_ADDIN_TYPE, "996", "cmd://996", "新手指南", "功能模块", "noear"));
-//
-//            Setting.setIsInitedAddins(true);
-//        }
-    }
-
-
-    public static boolean isFilter(String key) {
-//        if(Session.isVip>0 || key.startsWith("@"))
-//            return false;
-//
-//        return  false;
-
-//        return Setting.filter().matcher(key).find();
-        return true;
     }
 }

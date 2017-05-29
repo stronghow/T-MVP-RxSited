@@ -7,7 +7,6 @@ import android.text.TextUtils;
 
 import com.App;
 import com.C;
-import com.base.util.helper.RxSchedulers;
 import com.dao.engine.DdSource;
 import com.model.LookModel;
 import com.model.Sections;
@@ -15,16 +14,15 @@ import com.model.SourceModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.realm.Realm;
 import io.realm.RealmModel;
 import io.realm.RealmResults;
 import me.noear.db.DataReader;
 import me.noear.db.DbContext;
 import me.noear.utils.EncryptUtil;
-import rx.Observable;
 
 
 /**
@@ -62,15 +60,26 @@ public class SiteDbApi {
         insertOrUpdate(model);
     }
 
-    public static void updateLastlook(ArrayList<Sections> sectionses,Sections model){
+    public static void updateLastlook(List<Sections> sectionses,Sections model){
         //设置book::sections记录
         //记录数据位置
+
         SiteDbApi.setLastLook(model.bookUrl,model.url,model.index);
-        Observable.from(sectionses)
+//        for(Sections s : sectionses)
+//        {
+//            if(s.isLook){
+//                s.isLook = false;
+//                SiteDbApi.insertOrUpdate(s);
+//            }
+//            if((s.url != null && s.index == model.index)){
+//                s.isLook = true;
+//                SiteDbApi.insertOrUpdate(s);
+//            }
+//        }
+        Observable.fromIterable(sectionses)
                 .filter((sections) -> sections.isLook||(sections.url != null && sections.index == model.index))
                 .map(sections -> {sections.isLook=(sections.url != null && sections.index == model.index) ? true : false;return sections;})
                 .toList()
-                .compose(RxSchedulers.io_io())
                 .subscribe((data)->{
                     SiteDbApi.insertOrUpdate(data);
                 });
@@ -132,33 +141,6 @@ public class SiteDbApi {
         }
     }
 
-
-    //my subscibe
-    //
-    public static void addSource(DdSource sd, String sited, boolean isSubscribe) {
-        if (db.existsSQL("SELECT * FROM sites WHERE key=?", sd.url_md5) == false) {
-            long subTime = isSubscribe ? new Date().getTime() : 0;
-            db.updateSQL("INSERT INTO sites(author,type,key,url,expr,ver,title,intro,logo,sited,logTime,subTime,cookies) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'');",
-                    sd.author,sd.main.dtype(),sd.url_md5, sd.url, sd.expr, sd.ver, sd.title, sd.intro, sd.logo, sited, new Date().getTime(), subTime);
-        }
-        else {
-            db.updateSQL("UPDATE  sites SET author=?,type=?,ver=?,title=?,intro=?,logo=?,sited=?,expr=? WHERE key=?;",
-                    sd.author, sd.main.dtype(), sd.ver, sd.title, sd.intro, sd.logo, sited, sd.expr, sd.url_md5);
-        }
-    }
-
-    public static void addSourceByLocal(SourceModel sm) {
-
-        if (db.existsSQL("SELECT * FROM sites WHERE key=?", sm.key) == false) {
-            long subTime = new Date().getTime();
-            db.updateSQL("INSERT INTO sites(author,type,key,url,expr,ver,title,intro,logo,sited,logTime,subTime,cookies) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'');",
-                    sm.author, sm.type, sm.key, sm.url, sm.expr, sm.ver, sm.title, sm.intro, sm.logo, "", new Date().getTime(), subTime);
-        }
-        else {
-            db.updateSQL("UPDATE  sites SET author=?,type=?,ver=?,title=?,intro=?,logo=?,sited=?,expr=? WHERE key=?;",
-                    sm.author, sm.type, sm.ver, sm.title, sm.intro, sm.logo, "", "", sm.key);
-        }
-    }
 
     public static void setSourceExpr(DdSource sd){
         db.updateSQL("UPDATE  sites SET expr=? WHERE key=?;",
@@ -249,44 +231,5 @@ public class SiteDbApi {
         dr.close();//内部同时关闭游标和数据库
 
         return m;
-    }
-
-    public static List<SourceModel> getAddins(boolean isOnlySubscibe) {
-        List<SourceModel> list = new ArrayList<>();
-
-        String sql = null;
-        if(isOnlySubscibe)
-            sql = "SELECT * FROM sites WHERE type<>99 AND subTime>0 ORDER BY subTime ASC";
-        else
-            sql = "SELECT * FROM sites WHERE type<>99 ORDER BY subTime ASC";
-
-        DataReader dr = db.selectSQL(sql);
-
-        while (dr.read()) {
-            SourceModel m = new SourceModel();
-            m.id      = dr.getInt("id");
-            m.type    = dr.getInt("type");
-            m.key     = dr.getString("key");
-            m.url     = dr.getString("url");
-            m.ver     = dr.getInt("ver");
-            m.author  = dr.getString("author");
-            m.title   = dr.getString("title");
-            m.intro   = dr.getString("intro");
-            m.logo    = dr.getString("logo");
-            m.subTime = dr.getLong("subTime");
-            list.add(m);
-        }
-        dr.close();//内部同时关闭游标和数据库
-
-        return list;
-    }
-
-
-    public static void addSubscibeByKey(String key,String url,String title) {
-
-        long subTime = new Date().getTime();
-
-        db.updateSQL("UPDATE sites SET subTime=?,title=? WHERE key=?;", subTime,title, key);
-
     }
 }

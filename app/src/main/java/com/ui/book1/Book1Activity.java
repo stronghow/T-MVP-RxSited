@@ -1,7 +1,5 @@
 package com.ui.book1;
 
-import android.os.Handler;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import com.C;
@@ -9,14 +7,18 @@ import com.app.annotation.apt.Extra;
 import com.app.annotation.apt.Router;
 import com.app.annotation.apt.SceneTransition;
 import com.base.BaseActivity;
+import com.base.entity.DataExtra;
 import com.base.util.BindingUtils;
+import com.base.util.helper.RxSchedulers;
 import com.model.Sections;
 import com.model.Tag;
 import com.socks.library.KLog;
 import com.ui.main.R;
 import com.ui.main.databinding.ActivitySitedBookBinding;
 
-import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
 
 /**
  * Created by haozhong on 2017/4/4.
@@ -44,9 +46,7 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
         BindingUtils.loadImg(mViewBinding.image, model.logo,model.url);
         BindingUtils.blur_loadImg(mViewBinding.blurimage,model.logo,model.url);
         setTitle(model.name);
-        HashMap map = new HashMap();
-        map.put(C.MODEL,model);
-        mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(),map);
+        mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(), DataExtra.getExtra(C.MODEL,model));
     }
 
     @Override
@@ -58,16 +58,19 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
             ((Sections)mViewBinding.listItem.getCoreAdapter().getItemList().get(C.oldIndex)).isLook = false;
             mViewBinding.listItem.getCoreAdapter().notifyItemChanged(C.oldIndex);
             mViewBinding.listItem.getCoreAdapter().notifyItemChanged(C.newIndex);
-            C.oldIndex  = C.newIndex;
+            C.oldIndex  = C.newIndex; //更新之后，原来新的位置变成了旧的
             mViewBinding.listItem.moveToposition(C.newIndex);
         }else{
-            ViewTreeObserver observer = mViewBinding.listItem.getViewTreeObserver();
-            observer.addOnGlobalLayoutListener(()->{
+            //监听recycleview渲染完毕
+            mViewBinding.listItem.getViewTreeObserver().addOnGlobalLayoutListener(()->{
                 if(!isResume && mViewBinding.listItem.hasFocus())
-                    new Handler().postDelayed(()->{
+                    Observable.timer(300, TimeUnit.MILLISECONDS)
+                    .compose(RxSchedulers.io_main())
+                    .subscribe(t ->{
                         mViewBinding.listItem.moveToposition(C.oldIndex);
                         isResume = true;
-                    },300);
+                    });
+
             });
         }
     }

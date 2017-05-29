@@ -24,7 +24,7 @@
         android:layout_height="35dp"
         android:foreground="?attr/selectableItemBackground"
         android:longClickable="true"
-        android:onClick='@{()->RouterHelper.go(C.TAG,DataExtra.getExtra(C.SOURCE,SourceApi.loadSource(item.sited,"",true)))}'
+        android:onClick='@{()->RouterHelper.go(C.TAG,DataExtra.create().add(C.SOURCE,SourceApi.loadSource(item.sited,"",true)).add(C.URL,item.url).build())}'
         android:background="?attr/backgroundCard">
 
 

@@ -94,7 +94,7 @@ public class BindingUtils {
                 });
     }
 
-    @BindingAdapter({"roundImageUrl"})
+    @BindingAdapter({"roundImageUrl","refUrl"})
     public static void loadRoundImg(ImageView v, String url,String refererUrl) {
         v.setColorFilter(v.getContext().getResources().getColor(SpUtil.isNight() ? R.color.CoverColor : R.color.colorWhite), PorterDuff.Mode.MULTIPLY);
         //网络防盗链

@@ -1,8 +1,11 @@
 package com.ui.tag;
 
+import android.view.MenuItem;
+
 import com.C;
 import com.app.annotation.apt.Extra;
 import com.app.annotation.apt.Router;
+import com.arlib.floatingsearchview.FloatingSearchView;
 import com.base.BaseActivity;
 import com.base.util.helper.FragmentAdapter;
 import com.base.util.helper.PagerChangeListener;
@@ -15,7 +18,7 @@ import com.ui.main.databinding.ActivitySitedTagBinding;
 import java.util.HashMap;
 import java.util.List;
 
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * Created by haozhong on 2017/4/5.
@@ -30,9 +33,20 @@ public class TagActivity extends BaseActivity<TagPresenter,ActivitySitedTagBindi
     @Extra(C.SOURCE)
     public DdSource source;
 
+    private int lastIndex;
+
+    private TagFragment lastTagFragment;
+
+    private long oldtime;
+
     @Override
     public int getLayoutId() {
         return R.layout.activity_sited_tag;
+    }
+
+    @Override
+    public int getMenuId() {
+        return R.menu.menu_tag;
     }
 
 
@@ -48,9 +62,39 @@ public class TagActivity extends BaseActivity<TagPresenter,ActivitySitedTagBindi
     }
 
     @Override
+    public void initEven() {
+        mViewBinding.search.setOnFocusChangeListener(new FloatingSearchView.OnFocusChangeListener() {
+            int oldItem = mViewBinding.viewpager.getCurrentItem();
+
+            @Override
+            public void onFocus() {
+                mViewBinding.viewpager.setCurrentItem(lastIndex,true);
+            }
+
+            @Override
+            public void onFocusCleared() {
+                mViewBinding.viewpager.setCurrentItem(oldItem,true);
+            }
+        });
+
+
+        mViewBinding.search.setOnQueryChangeListener(new FloatingSearchView.OnQueryChangeListener() {
+            @Override
+            public void onSearchTextChanged(String oldQuery, String newQuery) {
+                lastTagFragment.updateData(newQuery);
+//                if(System.currentTimeMillis() - oldtime > 1000) {
+//                    lastTagFragment.updateData(newQuery);
+//                    oldtime = System.currentTimeMillis();
+//                }
+            }
+        });
+    }
+
+    @Override
     public void showTabList(List<Tags> mTabs) {
+        lastIndex = mTabs.size() -1;
         KLog.json("进入showTabList");
-        Observable.from(mTabs).map(tags -> TagFragment.newInstance(tags.url,source,tags)).toList()
+        Observable.fromIterable(mTabs).map(tags -> {lastTagFragment = TagFragment.newInstance(tags.url,source,tags);return lastTagFragment;}).toList()
                 .map(fragments -> FragmentAdapter.newInstance(getSupportFragmentManager(),fragments,mTabs))
                 .subscribe(mFragmentAdapter -> mViewBinding.viewpager.setAdapter(mFragmentAdapter));
         PagerChangeListener mPagerChangeListener = PagerChangeListener.newInstance(mViewBinding.collapsingToolbar,mViewBinding.toolbarIvTarget,mViewBinding.toolbarIvOutgoing,new String[mTabs.size()]);
@@ -58,4 +102,21 @@ public class TagActivity extends BaseActivity<TagPresenter,ActivitySitedTagBindi
         mViewBinding.tabs.setupWithViewPager(mViewBinding.viewpager);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_search:
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mViewBinding.search.isFocused()){
+            mViewBinding.search.clearFocus();
+        }else{
+            super.onBackPressed();
+        }
+    }
 }

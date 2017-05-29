@@ -2,16 +2,12 @@ package com.model;
 
 
 import com.app.annotation.apt.QueryKey;
-import com.base.BaseBean;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 //ͼƬ
-public class PicModel  extends RealmObject implements BaseBean {
-
-
-	public String objectId;
+public class PicModel  extends RealmObject{
 
 	@PrimaryKey
 	public  String url;
@@ -32,11 +28,5 @@ public class PicModel  extends RealmObject implements BaseBean {
 
 	public int tmpWidth;
 	public int tmpHeight;
-
-	@Override
-	public String getObjectId() {
-		return this.objectId;
-	}
-
 }
 

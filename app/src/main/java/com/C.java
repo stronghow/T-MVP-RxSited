@@ -3,22 +3,15 @@ package com;
 import com.model.Sections;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by baixiaokang on 16/4/23.
  */
 public class C {
     //==================API============//
-    public static final String X_LC_Id = "i7j2k7bm26g7csk7uuegxlvfyw79gkk4p200geei8jmaevmx";
-    public static final String X_LC_Key = "n6elpebcs84yjeaj5ht7x0eii9z83iea8bec9szerejj7zy3";
-    public static final String BASE_URL = "https://leancloud.cn:443/1.1/";
-
-    public static final String ADMIN_ID = "53d9076ce4b0ef69707fc78c";
-    public static final String ADMIN_FACE = "https://avatars0.githubusercontent.com/u/7598555?v=3&s=460";
-    //==================Base============//
-    public static final int PAGE_COUNT = 10;
     public static final int FLAG_MULTI_VH = 0x000001;
-    public static final String OPEN_TYPE = "公开";
+
 
     //==================intent============//
     public static final String TRANSLATE_VIEW = "share_img";
@@ -75,13 +68,13 @@ public class C {
     public static final String LOAD_NO_CACHE = "load_no_cache";  //不使用缓存，只从网络获取数据.
     public static final String LOAD_CACHE_ELSE_NETWORK = "load+_cache_else_network"; //只要本地有，无论是否过期，或者no-cache，都使用缓存中的数据。
 
-    public static ArrayList<Sections> sSectionses = new ArrayList<>();
+    public static List<Sections> sSectionses = new ArrayList<>();
 
     public static int oldIndex;
 
     public static int newIndex;
 
-    public static final String BATTERY = "Battery";
+    public static final String BATTERY = "Battery"; //获取低昂量
 
     public static final String BOOKNAME = "bookname";
 }

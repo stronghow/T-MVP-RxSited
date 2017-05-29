@@ -244,11 +244,47 @@ public class SdSource {
         }
     }
 
-    public void getNodeViewModel(ISdViewModel viewModel, boolean isUpdate, String key, int page, SdNode config, SdSourceCallback callback) {
+//    public void getNodeViewModel(ISdViewModel viewModel, boolean isUpdate, int page, String key, SdNode config, SdSourceCallback callback) {
+//
+//        try {
+//            doGetNodeViewModel(viewModel, isUpdate, key, page, config, callback);
+//        }catch (Exception ex){
+//            callback.run(1);
+//        }
+//    }
+
+    public void getNodeViewModel(ISdViewModel viewModel, boolean isUpdate, boolean isSearch, int page, String url, SdNode config, SdSourceCallback callback) {
+        if(isSearch){
+            try {
+                doGetNodeViewModel(viewModel, isUpdate, url, page, config, callback);
+            }catch (Exception ex){
+                callback.run(1);
+            }
+        }else {
+            config.url = url;
+            doGetNodeViewModel(viewModel, isUpdate, null, page, config, callback);
+        }
+    }
+
+    public void getNodeViewModel(ISdViewModel viewModel, boolean isUpdate, String url, SdNode config, SdSourceCallback callback) {
+        //需要对url进行转换成最新的格式（可能之前的旧的格式缓存）
 
         try {
-            doGetNodeViewModel(viewModel, isUpdate, key, page, config, callback);
-        }catch (Exception ex){
+            if (DoCheck(url, cookies(), true) == false) {
+
+                callback.run(99);
+                return;
+            }
+
+            __AsyncTag tag = new __AsyncTag();
+
+            doGetNodeViewModel(viewModel, isUpdate, tag, url, null, config, callback);
+
+            if (tag.total == 0) {
+                callback.run(1);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
             callback.run(1);
         }
     }
@@ -325,35 +361,6 @@ public class SdSource {
 
             callback.run(code);
         });
-    }
-
-
-    public void getNodeViewModel(ISdViewModel viewModel, boolean isUpdate, int page, String url, SdNode config, SdSourceCallback callback) {
-        config.url = url;
-        doGetNodeViewModel(viewModel, isUpdate, null, page, config, callback);
-    }
-
-    public void getNodeViewModel(ISdViewModel viewModel, boolean isUpdate, String url, SdNode config, SdSourceCallback callback) {
-        //需要对url进行转换成最新的格式（可能之前的旧的格式缓存）
-
-        try {
-            if (DoCheck(url, cookies(), true) == false) {
-
-                callback.run(99);
-                return;
-            }
-
-            __AsyncTag tag = new __AsyncTag();
-
-            doGetNodeViewModel(viewModel, isUpdate, tag, url, null, config, callback);
-
-            if (tag.total == 0) {
-                callback.run(1);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            callback.run(1);
-        }
     }
 
     private void doGetNodeViewModel(ISdViewModel viewModel, boolean isUpdate, final __AsyncTag tag, String url, Map<String, String> args, SdNode config, SdSourceCallback callback) {

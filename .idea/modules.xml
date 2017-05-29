@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/T-MVP-master.iml" filepath="$PROJECT_DIR$/T-MVP-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/T-MVP-RxSited.iml" filepath="$PROJECT_DIR$/T-MVP-RxSited.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/apt/apt.iml" filepath="$PROJECT_DIR$/apt/apt.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib/lib.iml" filepath="$PROJECT_DIR$/lib/lib.iml" />

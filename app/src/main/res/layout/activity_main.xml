@@ -71,9 +71,8 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="@dimen/fab_margin"
                 android:background="@drawable/button_ripple_blue"
-                android:onClick="onClick"
-                app:layout_behavior="com.view.behavior.MyFabBehavior"
                 app:srcCompat="@drawable/ic_add" />
+            <!--app:layout_behavior="com.view.behavior.MyFabBehavior"-->
 
         </android.support.design.widget.CoordinatorLayout>
 

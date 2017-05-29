@@ -13,16 +13,19 @@ import com.socks.library.KLog;
 import java.util.HashMap;
 import java.util.List;
 
-import rx.Subscriber;
-import rx.functions.Action1;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by haozhong on 2017/4/4.
  */
 @InstanceFactory
 public class TagPresenter extends TagContract.Presenter {
-
-
     @Override
     public void onAttached() {
         initEvent();
@@ -30,31 +33,18 @@ public class TagPresenter extends TagContract.Presenter {
 
     @Override
     public void getTabList(HashMap map) {
-        SitedFactory.getTags(map).subscribe(new Subscriber() {
-            @Override
-            public void onCompleted() {
-
-            }
-
-
-            @Override
-            public void onError(Throwable e) {
-                DbFactory.getTags(map).subscribe(new Action1() {
+        DbFactory.getTags(map)
+                .flatMap(new Function<RealmResults<Tags>, ObservableSource<List<Tags>>>() {
                     @Override
-                    public void call(Object o) {
-                        KLog.json("onError");
-                        showTabList((List<Tags>)o);
-//                 for (Tags tags : (List<Tags>)o){
-//                     KLog.json("name = " + tags.title);
-//                 }
+                    public ObservableSource<List<Tags>> apply(@NonNull RealmResults<Tags> tagses) throws Exception {
+                        if(tagses != null && tagses.size() >0)
+                            return Observable.just(Realm.getDefaultInstance().copyFromRealm(tagses));
+                        else return SitedFactory.getTags(map);
                     }
-                });
-            }
-
+                }).subscribe(new Consumer<List<Tags>>() {
             @Override
-            public void onNext(Object o) {
-                KLog.json("onError");
-                showTabList((List<Tags>)o);
+            public void accept(@NonNull List<Tags> tagses) throws Exception {
+                showTabList(tagses);
             }
         });
     }

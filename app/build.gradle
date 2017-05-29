@@ -71,12 +71,14 @@ dependencies {
 
     compile 'com.github.todou:appbarspring:1.0.3'
 
-    compile "com.squareup.retrofit2:retrofit:$retrofit_version"
-    compile "com.squareup.retrofit2:converter-gson:$retrofit_version"
-    compile "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
-    compile 'com.squareup.okhttp3:logging-interceptor:3.1.2'
-    compile 'io.reactivex:rxandroid:1.0.1'
-    compile 'com.google.code.gson:gson:2.7'
+//    compile "com.squareup.retrofit2:retrofit:$retrofit_version"
+//    compile "com.squareup.retrofit2:converter-gson:$retrofit_version"
+//    compile "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
+//    compile 'com.squareup.okhttp3:logging-interceptor:3.1.2'
+//    compile 'io.reactivex:rxandroid:1.0.1'
+//    compile 'com.google.code.gson:gson:2.7'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile "io.reactivex.rxjava2:rxjava:2.1.0"
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'org.aspectj:aspectjrt:1.8.9'
 
@@ -89,6 +91,9 @@ dependencies {
 
     //log
     compile 'com.github.zhaokaiqiang.klog:library:1.5.0'
+
+    //searchview
+    compile 'com.github.arimorty:floatingsearchview:2.0.4'
 
 
     compile files('libs/Noear.Snacks.jar')

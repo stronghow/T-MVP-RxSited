@@ -1,11 +1,9 @@
 package com;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.DisplayMetrics;
@@ -19,8 +17,6 @@ import com.dao.engine.DdLogListener;
 import com.dao.engine.DdNodeFactory;
 import com.socks.library.KLog;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Stack;
 
 import io.realm.Realm;
@@ -32,23 +28,14 @@ import io.realm.RealmConfiguration;
 public class App extends Application {
     private static App mCurrent;
     public static Stack<Activity> store;
-    //public HashMap<String, Object> mCurActivityExtra;
 
     @TimeLog
     public void onCreate() {
         super.onCreate();
         mCurrent = this;
 
-        int pid = android.os.Process.myPid();
-        String processAppName = getAppName(pid);
-
-        if (processAppName == null || processAppName.equals("")) {
-            return;
-        }
-
         KLog.init(true,"RxSited_Log");
 
-        //ImgLoader.init(getContext());
         DdApi.tryInit(new DdNodeFactory(), new DdLogListener());
         SourceApi.tryInit();
         Realm.init(this);
@@ -57,14 +44,9 @@ public class App extends Application {
                 .migration(new migration()) // Migration to run instead of throwing an exception
                 .build();
         Realm.setDefaultConfiguration(config);
-//        try {
-//            Class.forName("com.eclipsesource.v8.v8");
-//        }catch (ClassNotFoundException e){
-//            KLog.json("can do Class.forName(\"com.eclipsesource.v8\")");
-//            e.printStackTrace();
-//        }
+
         SpUtil.init(this);
-        //SitedFactory.init();
+
         AppCompatDelegate.setDefaultNightMode(SpUtil.isNight() ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         store = new Stack<>();
         registerActivityLifecycleCallbacks(new SwitchBackgroundCallbacks());
@@ -120,34 +102,6 @@ public class App extends Application {
      */
     public static Activity getCurActivity() {
         return store.lastElement();
-    }
-
-
-    /**
-     * sited
-     * @param pID
-     * @return
-     */
-
-    private String getAppName(int pID) {
-        String processName = null;
-        ActivityManager am = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
-        List l = am.getRunningAppProcesses();
-        Iterator i = l.iterator();
-        PackageManager pm = this.getPackageManager();
-        while (i.hasNext()) {
-            ActivityManager.RunningAppProcessInfo info = (ActivityManager.RunningAppProcessInfo) (i.next());
-            try {
-                if (info.pid == pID) {
-                    CharSequence c = pm.getApplicationLabel(pm.getApplicationInfo(info.processName, PackageManager.GET_META_DATA));
-                    processName = info.processName;
-                    return processName;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return processName;
     }
 
     public static App getCurrent(){

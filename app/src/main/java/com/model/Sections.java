@@ -1,17 +1,12 @@
 package com.model;
 
 import com.app.annotation.apt.QueryKey;
-import com.base.BaseBean;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 
-public class Sections extends RealmObject implements BaseBean {
-
-
-	public String objectId;
-
+public class Sections extends RealmObject{
 	public int index;
 	public int orgIndex;
 
@@ -45,10 +40,5 @@ public class Sections extends RealmObject implements BaseBean {
 		}
 
 		return _code;
-	}
-
-	@Override
-	public String getObjectId() {
-		return objectId;
 	}
 }

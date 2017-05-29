@@ -105,7 +105,10 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder> {
     }
 
     public void setBeans(List<M> data, int begin) {
-        if (data == null) data = new ArrayList<>();
+        if (data == null) {
+            this.isHasMore = false;
+            return;
+        }
         this.isHasMore = (data.size() > 0 && begin > 0);
         if (begin > 1) this.mItemList.addAll(data);
         else this.mItemList = data;

@@ -1,30 +1,32 @@
 package com.base.util.helper;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.ObservableTransformer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by baixiaokang on 16/5/6.
  */
 public class RxSchedulers {
-    public static final Observable.Transformer<?, ?> mio_mainTransformer
-            = observable -> observable
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread());
+    public static final ObservableTransformer mio_mainTransformer
+            = ObservableTransformer -> ObservableTransformer
+            .subscribeOn(io.reactivex.schedulers.Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .unsubscribeOn(io.reactivex.schedulers.Schedulers.io());
 
-    public static final Observable.Transformer<?, ?> mio_ioTransformer
-            = observable -> observable
-            .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io());
+
+    public static final ObservableTransformer<?, ?> mio_ioTransformer
+            = ObservableTransformer -> ObservableTransformer
+            .subscribeOn(io.reactivex.schedulers.Schedulers.io())
+            .observeOn(io.reactivex.schedulers.Schedulers.io())
+            .unsubscribeOn(io.reactivex.schedulers.Schedulers.io());
 
     @SuppressWarnings("unchecked")
-    public static <T> Observable.Transformer<T, T> io_main() {
-        return (Observable.Transformer<T, T>) mio_mainTransformer;
+    public static ObservableTransformer io_main() {
+        return  mio_mainTransformer;
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Observable.Transformer<T, T> io_io() {
-        return (Observable.Transformer<T, T>) mio_ioTransformer;
+    public static ObservableTransformer io_io() {
+        return  mio_ioTransformer;
     }
 }
