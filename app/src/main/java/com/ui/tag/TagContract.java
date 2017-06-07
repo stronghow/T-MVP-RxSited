@@ -18,6 +18,6 @@ public interface TagContract {
 
     abstract class Presenter extends BasePresenter<View>{
 
-        public abstract void getTabList(HashMap map);
+        public abstract void getTabList(HashMap<String,Object> map);
     }
 }

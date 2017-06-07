@@ -12,22 +12,23 @@ import java.util.List;
 
 import io.reactivex.disposables.Disposable;
 import io.realm.Realm;
+import io.realm.RealmObject;
 
 /**
  * Created by baixiaokang on 16/12/27.
  */
 
-public class AdapterPresenter<M> {
+public class AdapterPresenter<M extends RealmObject> {
 //    public static final int LOAD_CACHE_ONLY = 0; // 不使用网络，只读取本地缓存数据
 //    public static final int LOAD_DEFAULT = 1; //（默认）根据cache-control决定是否从网络上取数据。
 //    public static final int LOAD_NO_CACHE = 2;  //不使用缓存，只从网络获取数据.
 //    public static final int LOAD_CACHE_ELSE_NETWORK = 3; //只要本地有，无论是否过期，或者no-cache，都使用缓存中的数据。
-    private NetRepository mNetRepository;//仓库
+    private NetRepository<M> mNetRepository;//仓库
     private HashMap<String, Object> param = new HashMap<>();//设置远程网络仓库钥匙
-    private DbRepository mDbRepository;
+    private DbRepository<M> mDbRepository;
     private int begin = 0;
     private final IAdapterView<M> view;
-    private boolean isCACHE_NETWORK; //缓存和网络一起
+//    private boolean isCACHE_NETWORK; //缓存和网络一起
     private boolean Refreshing = false;
     private Disposable mDbSubscription;
     private Disposable mNetSubscription;
@@ -74,10 +75,10 @@ public class AdapterPresenter<M> {
         return this.begin;
     }
 
-    public AdapterPresenter setLoadDataMethod(boolean isCACHE_NETWORK){
-        this.isCACHE_NETWORK = isCACHE_NETWORK;
-        return this;
-    }
+//    public AdapterPresenter setLoadDataMethod(boolean isCACHE_NETWORK){
+//        this.isCACHE_NETWORK = isCACHE_NETWORK;
+//        return this;
+//    }
 
     public void setRefreshing(boolean refreshing) {
         Refreshing = refreshing;
@@ -140,7 +141,7 @@ public class AdapterPresenter<M> {
         if(mNetRepository != null && NetWorkUtil.isNetConnected(App.getContext()))
             mNetSubscription = mNetRepository
                     .getData(param)
-                    .subscribe(res -> view.setNetData(res.results, begin),
+                    .subscribe(res -> view.setNetData(res, begin),
                             err -> err.printStackTrace(),
                             ()-> {
                                 Refreshing = false;

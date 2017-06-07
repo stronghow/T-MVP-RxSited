@@ -16,7 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.C;
-import com.app.annotation.aspect.DbRealm;
 import com.socks.library.KLog;
 import com.ui.main.R;
 
@@ -25,7 +24,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IAdapterView {
+import io.realm.RealmObject;
+
+public class TRecyclerView<M extends RealmObject> extends FrameLayout implements AdapterPresenter.IAdapterView {
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recyclerview;
     private LinearLayout ll_emptyView;
@@ -218,12 +219,12 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         }
     }
 
-    @DbRealm
+    //@DbRealm
     public void setNetData(List data, int begin) {
 
         swipeRefresh.setRefreshing(false);
         mCommAdapter.setBeans(data, begin);
-        if ((begin==1)&&(data == null || data.size() == 0)) {
+        if ((begin<1)&&(data == null || data.size() == 0)) {
             KLog.json("setEmpty");
             setEmpty();
         }
@@ -240,7 +241,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     public void setDBData(List data,int begin) {
         swipeRefresh.setRefreshing(false);
         mCommAdapter.setBeans(data, begin);
-        if ((begin==1)&&(data == null || data.size() == 0))
+        if ((begin<1)&&(data == null || data.size() == 0))
             setEmpty();
         else if (isReverse)
             recyclerview.scrollToPosition(mCommAdapter.getItemCount() - data.size() - 2);

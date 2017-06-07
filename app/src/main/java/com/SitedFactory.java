@@ -20,6 +20,7 @@ import com.socks.library.KLog;
 
 import org.noear.sited.SdSourceCallback;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ import io.reactivex.subjects.PublishSubject;
  */
 
 public class SitedFactory {
-    private static DataArr mData = new DataArr();
+    private static List<PicModel> mData = new ArrayList();
 
     /**
      * @apiNote 获取hots节点网络数据
@@ -154,7 +155,7 @@ public class SitedFactory {
      * @param param
      * @return Observable
      */
-    public static Observable getTag(HashMap<String, Object> param){
+    public static Observable<List<Tag>> getTag(HashMap<String, Object> param){
 
         PublishSubject  mSubject = PublishSubject.create();
         DdSource source = (DdSource) param.get(C.SOURCE);
@@ -178,7 +179,7 @@ public class SitedFactory {
                     DataArr<Tag> data = new DataArr<>();
                     KLog.json("size=" + viewModel.resultList.size());
                     data.results = viewModel.resultList;
-                    mSubject.onNext(data);
+                    mSubject.onNext(viewModel.resultList);
                     mSubject.onComplete();
                     Observable.fromIterable(viewModel.resultList).map(tag -> {tag.QueryKey = model.url + param.get(C.PAGE);return tag;}).toList()
                             .subscribe(tags -> SiteDbApi.insertOrUpdate(tags));
@@ -194,7 +195,7 @@ public class SitedFactory {
      * @param param HashMap<String, Object> param
      * @return Observable
      */
-    public static Observable getBook(HashMap<String, Object> param){
+    public static Observable<List<Sections>> getBook(HashMap<String, Object> param){
         PublishSubject  mSubject = PublishSubject.create();
         KLog.json("进入Observable");
         Tag model = (Tag) param.get(C.MODEL);
@@ -227,7 +228,7 @@ public class SitedFactory {
      * @param param HashMap<String, Object> param
      * @return Observable
      */
-    public static Observable getSection(HashMap<String, Object> param){
+    public static Observable<List<PicModel>> getSection(HashMap<String, Object> param){
         PublishSubject mSubject = PublishSubject.create();
         KLog.json("进入Observable");
         Sections model = (Sections) param.get(C.MODEL);
@@ -263,10 +264,10 @@ public class SitedFactory {
                 }
                 else {
                     KLog.json("SitedFactory::getSection()");
-                    DataArr<PicModel> data = new DataArr<>();
-                    data.results =  viewModel.items;
-                    mData.results =  viewModel.items;
-                    mSubject.onNext(data);
+//                    DataArr<PicModel> data = new DataArr<>();
+//                    data.results =  viewModel.items;
+                    mData =  viewModel.items;
+                    mSubject.onNext(viewModel.items);
                     mSubject.onComplete();
                     Observable.fromIterable(viewModel.items).map(picModel -> {picModel.QueryKey = picModel.sections.url; return picModel;})
                             .toList()
@@ -296,26 +297,26 @@ public class SitedFactory {
                         .toList()
                         .map(s -> {Collections.reverse(s);return s;})
                         .subscribe(s ->{
-                            DataArr<Sections> data = new DataArr<>();
-                            data.results =  s;
+//                            DataArr<Sections> data = new DataArr<>();
+//                            data.results =  s;
                             C.sSectionses = s;
                             KLog.json("getBook=" + model.url);
                             //C.sSectionses = sectionses;
                             SiteDbApi.insertOrUpdate(s);
-                            Subscriber.onNext(data);
+                            Subscriber.onNext(s);
                             Subscriber.onComplete();
                         });
 
             }
         }else if(viewModel.sectionList().size()==1){ //只有一条数据不用改
             viewModel.sectionList().get(0).QueryKey = model.url;
-            DataArr<Sections> data = new DataArr<>();
-            data.results =  viewModel.sectionList();
+//            DataArr<Sections> data = new DataArr<>();
+//            data.results =  viewModel.sectionList();
             C.sSectionses =  viewModel.sectionList();
             KLog.json("getBook=" + model.url);
             //C.sSectionses = sectionses;
             SiteDbApi.insertOrUpdate(viewModel.sectionList());
-            Subscriber.onNext(data);
+            Subscriber.onNext(viewModel.sectionList());
             Subscriber.onComplete();
         }
     }
