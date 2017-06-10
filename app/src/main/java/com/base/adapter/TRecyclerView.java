@@ -24,9 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import io.realm.RealmObject;
-
-public class TRecyclerView<M extends RealmObject> extends FrameLayout implements AdapterPresenter.IAdapterView {
+public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IAdapterView {
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recyclerview;
     private LinearLayout ll_emptyView;
@@ -39,6 +37,7 @@ public class TRecyclerView<M extends RealmObject> extends FrameLayout implements
     private int headType, footType, spanCount;
     private int lastVisibleItem,total;
     private SimpleDateFormat ft = new SimpleDateFormat("HH:mm");
+    private int begin;
 
     public TRecyclerView(Context context) {
         super(context);
@@ -205,7 +204,7 @@ public class TRecyclerView<M extends RealmObject> extends FrameLayout implements
     }
 
     public void reFetch() {
-        mCoreAdapterPresenter.setBegin(0);
+        mCoreAdapterPresenter.setBegin(begin - 1);
         swipeRefresh.setRefreshing(true);
         mCoreAdapterPresenter.fetch_Net();
     }
@@ -221,10 +220,10 @@ public class TRecyclerView<M extends RealmObject> extends FrameLayout implements
 
     //@DbRealm
     public void setNetData(List data, int begin) {
-
+        this.begin = begin;
         swipeRefresh.setRefreshing(false);
         mCommAdapter.setBeans(data, begin);
-        if ((begin<1)&&(data == null || data.size() == 0)) {
+        if ((begin <= 1)&&(data == null || data.size() == 0)) {
             KLog.json("setEmpty");
             setEmpty();
         }
@@ -239,9 +238,10 @@ public class TRecyclerView<M extends RealmObject> extends FrameLayout implements
 
     @Override
     public void setDBData(List data,int begin) {
+        this.begin = begin;
         swipeRefresh.setRefreshing(false);
         mCommAdapter.setBeans(data, begin);
-        if ((begin<1)&&(data == null || data.size() == 0))
+        if ((begin <= 1)&&(data == null || data.size() == 0))
             setEmpty();
         else if (isReverse)
             recyclerview.scrollToPosition(mCommAdapter.getItemCount() - data.size() - 2);

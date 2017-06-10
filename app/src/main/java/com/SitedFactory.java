@@ -2,7 +2,6 @@ package com;
 
 import android.text.TextUtils;
 
-import com.base.entity.DataArr;
 import com.base.util.helper.RxSchedulers;
 import com.dao.SourceApi;
 import com.dao.db.SiteDbApi;
@@ -45,33 +44,7 @@ public class SitedFactory {
      * @return Observable
      */
     public static Observable getHots(HashMap<String, Object> param){
-//      subjects.PublishSubject mSubject = subjects.PublishSubject.create();
-//        KLog.json("进入Observable");
-//        DdSource source = (DdSource) param.get(C.SOURCE);
-//        if(source == null){
-//            source = SourceApi.getByUrl((String)param.get(C.URL));
-//            if(source == null) {
-//                KLog.json("source == null");
-//                return  Observable_NULL();
-//            }
-//        }
-//
-//        MainViewModel viewModel = new MainViewModel();
-//        source.getNodeViewModel(viewModel, source.home, (boolean) param.get(C.ISUPDATE), new SdSourceCallback() {
-//            @Override
-//            public void run(Integer code) {
-//                if(code == 1) {
-//                    DataArr<Hots> data = new DataArr<>();
-//                    data.results = viewModel.hotList;
-//                    KLog.json("tagList.size:"+viewModel.tagList.size());
-//                    //OkBus.getInstance().onEvent(EventTags.SHOW_TAG_LIST, viewModel.tagList);
-//                    mSubject.onNext(data);
-//                    mSubject.onComplete();
-//                }
-//            }
-//        });
-//
-//        return mSubject.compose(RxSchedulers.io_main());
+
         return null;
     }
 
@@ -81,32 +54,6 @@ public class SitedFactory {
      * @return Observable
      */
     public static Observable getUpdates(HashMap<String, Object> param){
-//        PublishSubject  mSubject = PublishSubject.create();
-//        KLog.json("进入Observable");
-//        DdSource source = (DdSource) param.get(C.SOURCE);
-//        if(source == null){
-//            source = SourceApi.getByUrl((String)param.get(C.URL));
-//            if(source == null) {
-//                KLog.json("source == null");
-//                return  Observable_NULL();
-//            }
-//        }
-//
-//        MainViewModel viewModel = new MainViewModel();
-//        source.getNodeViewModel(viewModel, source.home, (boolean) param.get(C.ISUPDATE), new SdSourceCallback() {
-//            @Override
-//            public void run(Integer code) {
-//                if(code == 1) {
-//                    DataArr<Updates> data = new DataArr<>();
-//                    data.results = viewModel.updateList;
-//                    //OkBus.getInstance().onEvent(EventTags.SHOW_TAG_LIST, viewModel.tagList);
-//                    mSubject.onNext(data);
-//                    mSubject.onCompleted();
-//                }
-//            }
-//        });
-//
-//        return mSubject.compose(RxSchedulers.io_main());
         return  null;
     }
 
@@ -176,9 +123,6 @@ public class SitedFactory {
             @Override
             public void run(Integer code) {
                 if(code == 1){
-                    DataArr<Tag> data = new DataArr<>();
-                    KLog.json("size=" + viewModel.resultList.size());
-                    data.results = viewModel.resultList;
                     mSubject.onNext(viewModel.resultList);
                     mSubject.onComplete();
                     Observable.fromIterable(viewModel.resultList).map(tag -> {tag.QueryKey = model.url + param.get(C.PAGE);return tag;}).toList()
@@ -202,7 +146,7 @@ public class SitedFactory {
         DdSource source = SourceApi.getByUrl(model.url);
         C.oldIndex = 0;
         if(source == null){
-            mSubject.onNext(new DataArr<>());
+            mSubject.onNext(new ArrayList<Sections>());
             mSubject.onComplete();
         }else {
             //sited::获取book节点的数据
@@ -264,8 +208,6 @@ public class SitedFactory {
                 }
                 else {
                     KLog.json("SitedFactory::getSection()");
-//                    DataArr<PicModel> data = new DataArr<>();
-//                    data.results =  viewModel.items;
                     mData =  viewModel.items;
                     mSubject.onNext(viewModel.items);
                     mSubject.onComplete();
@@ -297,11 +239,8 @@ public class SitedFactory {
                         .toList()
                         .map(s -> {Collections.reverse(s);return s;})
                         .subscribe(s ->{
-//                            DataArr<Sections> data = new DataArr<>();
-//                            data.results =  s;
                             C.sSectionses = s;
                             KLog.json("getBook=" + model.url);
-                            //C.sSectionses = sectionses;
                             SiteDbApi.insertOrUpdate(s);
                             Subscriber.onNext(s);
                             Subscriber.onComplete();
@@ -310,11 +249,8 @@ public class SitedFactory {
             }
         }else if(viewModel.sectionList().size()==1){ //只有一条数据不用改
             viewModel.sectionList().get(0).QueryKey = model.url;
-//            DataArr<Sections> data = new DataArr<>();
-//            data.results =  viewModel.sectionList();
             C.sSectionses =  viewModel.sectionList();
             KLog.json("getBook=" + model.url);
-            //C.sSectionses = sectionses;
             SiteDbApi.insertOrUpdate(viewModel.sectionList());
             Subscriber.onNext(viewModel.sectionList());
             Subscriber.onComplete();
@@ -328,6 +264,6 @@ public class SitedFactory {
      * @return Observable
      */
     private static Observable Observable_NULL(){
-        return Observable.just(new DataArr<>()).compose(RxSchedulers.io_main());
+        return Observable.just(new ArrayList<>(0)).compose(RxSchedulers.io_main());
     }
 }

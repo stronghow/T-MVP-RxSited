@@ -11,14 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.disposables.Disposable;
-import io.realm.Realm;
-import io.realm.RealmObject;
 
 /**
  * Created by baixiaokang on 16/12/27.
  */
 
-public class AdapterPresenter<M extends RealmObject> {
+public class AdapterPresenter<M> {
 //    public static final int LOAD_CACHE_ONLY = 0; // 不使用网络，只读取本地缓存数据
 //    public static final int LOAD_DEFAULT = 1; //（默认）根据cache-control决定是否从网络上取数据。
 //    public static final int LOAD_NO_CACHE = 2;  //不使用缓存，只从网络获取数据.
@@ -51,22 +49,23 @@ public class AdapterPresenter<M extends RealmObject> {
         return param;
     }
 
-    public AdapterPresenter setNetRepository(NetRepository netRepository) {
-        this.mNetRepository = netRepository;
+    public AdapterPresenter<M> setNetRepository(NetRepository<M> mNetRepository) {
+        this.mNetRepository = mNetRepository;
         return this;
     }
 
-    public AdapterPresenter setParam(String key, Object value) {
+    public AdapterPresenter<M> setParam(String key, Object value) {
         this.param.put(key, value);
         return this;
     }
 
-    public AdapterPresenter setDbRepository(DbRepository mDbRepository) {
+    public AdapterPresenter<M> setDbRepository(DbRepository<M> mDbRepository) {
         this.mDbRepository = mDbRepository;
         return this;
     }
 
-    public AdapterPresenter setBegin(int begin) {
+    public AdapterPresenter<M> setBegin(int begin) {
+        KLog.json("begin=" + begin);
         this.begin = begin;
         return this;
     }
@@ -120,7 +119,7 @@ public class AdapterPresenter<M extends RealmObject> {
                                     Refreshing = false;
                                     KLog.json("setDbData()");
                                     KLog.json("DBlist.size()=" + r.size());
-                                    view.setDBData(Realm.getDefaultInstance().copyFromRealm(r), begin);
+                                    view.setDBData(r, begin);
                                 }
                             },
                             err -> getNetData(),

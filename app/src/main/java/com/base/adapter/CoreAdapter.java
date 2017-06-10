@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.C;
+import com.socks.library.KLog;
 import com.ui.main.BR;
 import com.ui.main.R;
 
@@ -108,6 +109,7 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder> {
             this.isHasMore = false;
             return;
         }
+        KLog.json("setBeans::begin="+begin);
         this.isHasMore = (data.size() > 0 && begin > 0);
         if (begin > 1) this.mItemList.addAll(data);
         else this.mItemList = data;

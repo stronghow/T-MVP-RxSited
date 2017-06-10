@@ -26,13 +26,13 @@ public class TagPresenter extends TagContract.Presenter {
 
     @Override
     public void getTabList(HashMap<String,Object> map) {
-        mCompositeSubscription.add(
+
                 DataPresenter.getInstance(Tags.class)
                 .setParam(map)
                 .setDbRepository(DbFactory::getTags)
                 .setNetRepository(SitedFactory::getTags)
                 .fetch()
-                .subscribe(tagses ->  showTabList(tagses)));
+                .subscribe(tagses ->  showTabList(tagses));
     }
 
     @Bus(EventTags.SHOW_TAB_LIST)

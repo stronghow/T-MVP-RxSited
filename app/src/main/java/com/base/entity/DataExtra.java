@@ -1,6 +1,8 @@
 package com.base.entity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by baixiaokang on 16/12/30.
@@ -30,6 +32,16 @@ public class DataExtra {
 
     public  HashMap build() {
         return this.map;
+    }
+
+    public HashMap toMap(){ return this.map;}
+
+    public List<DataMap> toList(){
+        List<DataMap> dataMapList = new ArrayList<>();
+        for(String key : map.keySet())
+            dataMapList.add(new DataMap(key,(String)map.get(key)));
+        map = null;
+        return dataMapList;
     }
 
     public static HashMap getExtra(String key, Object value) {

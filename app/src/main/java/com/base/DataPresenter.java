@@ -2,6 +2,8 @@ package com.base;
 
 import com.App;
 import com.base.util.NetWorkUtil;
+import com.base.util.ToastUtil;
+import com.base.util.helper.RxSchedulers;
 import com.socks.library.KLog;
 
 import java.util.HashMap;
@@ -9,7 +11,6 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import io.realm.Realm;
 import io.realm.RealmObject;
 
 /**
@@ -21,9 +22,9 @@ public class DataPresenter<T extends RealmObject> {
 //    public static final int LOAD_DEFAULT = 1; //（默认）根据cache-control决定是否从网络上取数据。
 //    public static final int LOAD_NO_CACHE = 2;  //不使用缓存，只从网络获取数据.
 //    public static final int LOAD_CACHE_ELSE_NETWORK = 3; //只要本地有，无论是否过期，或者no-cache，都使用缓存中的数据。
-    private MNetRepository<T> mNetRepository;//仓库
+    private NetRepository<T> mNetRepository;//仓库
     private HashMap<String, Object> param = new HashMap<>();//设置远程网络仓库钥匙
-    private MDbRepository<T> mDbRepository;
+    private DbRepository<T> mDbRepository;
     //    private boolean isCACHE_NETWORK; //缓存和网络一起
     private boolean Refreshing = false;
     private Disposable mDbSubscription;
@@ -37,7 +38,7 @@ public class DataPresenter<T extends RealmObject> {
         return param;
     }
 
-    public DataPresenter<T> setNetRepository(MNetRepository<T> netRepository) {
+    public DataPresenter<T> setNetRepository(NetRepository<T> netRepository) {
         this.mNetRepository = netRepository;
         return this;
     }
@@ -52,7 +53,7 @@ public class DataPresenter<T extends RealmObject> {
         return this;
     }
 
-    public DataPresenter<T> setDbRepository(MDbRepository<T> mDbRepository) {
+    public DataPresenter<T> setDbRepository(DbRepository<T> mDbRepository) {
         this.mDbRepository = mDbRepository;
         return this;
     }
@@ -79,19 +80,24 @@ public class DataPresenter<T extends RealmObject> {
 
     public Observable<List<T>> getNetDataT(){
         if(NetWorkUtil.isNetConnected(App.getContext()) && mNetRepository != null)
-            return mNetRepository.getData(param);
-        else
+            return mNetRepository.getData(param)
+                    .compose(RxSchedulers.io_main());
+        else {
+            ToastUtil.show("请连接网络");
             return Observable.empty();
+        }
     }
 
     public Observable<List<T>> getDbDataT() {
             if(mDbRepository != null)
                 return mDbRepository
                         .getData(param)
-                        .flatMap(realmResults -> {
-                            if (realmResults != null && realmResults.size() > 0)
-                                return Observable.just(Realm.getDefaultInstance().copyFromRealm(realmResults));
-                            else return getNetDataT();
+                        .flatMap(ts -> {
+                                if (ts != null && ts.size() > 0) {
+                                    KLog.json("DataPresenter::getDbData -> null");
+                                    return Observable.just(ts).compose(RxSchedulers.io_main());
+                                }
+                                else return getNetDataT();
                         });
             else return getNetDataT();
     }
@@ -101,9 +107,12 @@ public class DataPresenter<T extends RealmObject> {
         if(mDbRepository != null)
             return mDbRepository
                     .getData(param)
-                    .flatMap(realmResults -> {
-                        if (realmResults != null && realmResults.size() > 0)
-                            return Observable.just(Realm.getDefaultInstance().copyFromRealm(realmResults));
+                    .flatMap(ts -> {
+                        if (ts != null && ts.size() > 0) {
+                            KLog.json("DataPresenter::getDbData -> null");
+                            return Observable.just(ts)
+                                    .compose(RxSchedulers.io_main());
+                        }
                         else return getNetDataT();
                     });
         else return getNetDataT();
