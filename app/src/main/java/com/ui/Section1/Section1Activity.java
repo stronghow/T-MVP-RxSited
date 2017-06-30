@@ -65,7 +65,7 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
         KLog.json("onDestroy");
         super.onDestroy();
         //更新Sections
-            SiteDbApi.updateLastlook(C.sSectionses, C.sSectionses.get(C.newIndex));
+
             unregisterReceiver(batteryReceiver);
         if(mViewBinding.listItem.getPresenter()!=null)
             mViewBinding.listItem.getPresenter().unsubscribe();

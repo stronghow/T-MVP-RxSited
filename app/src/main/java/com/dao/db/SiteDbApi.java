@@ -11,6 +11,7 @@ import com.dao.engine.DdSource;
 import com.model.LookModel;
 import com.model.Sections;
 import com.model.SourceModel;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,26 +61,28 @@ public class SiteDbApi {
         insertOrUpdate(model);
     }
 
+    public static void updateLastlook(Sections oldmodel,Sections newmodel){
+        //设置book::sections记录
+        //记录数据位置
+        SiteDbApi.setLastLook(newmodel.bookUrl,newmodel.url,newmodel.index);
+        KLog.json("oldmodel = " + oldmodel.name + "newmodel = " + newmodel.name);
+        oldmodel.isLook = false;
+        newmodel.isLook = true;
+        List<Sections> sectionses = new ArrayList<>();
+        sectionses.add(oldmodel);
+        sectionses.add(newmodel);
+        SiteDbApi.insertOrUpdate(sectionses);
+    }
+
     public static void updateLastlook(List<Sections> sectionses,Sections model){
         //设置book::sections记录
         //记录数据位置
 
         SiteDbApi.setLastLook(model.bookUrl,model.url,model.index);
-//        for(Sections s : sectionses)
-//        {
-//            if(s.isLook){
-//                s.isLook = false;
-//                SiteDbApi.insertOrUpdate(s);
-//            }
-//            if((s.url != null && s.index == model.index)){
-//                s.isLook = true;
-//                SiteDbApi.insertOrUpdate(s);
-//            }
-//        }
+
         Observable.fromIterable(sectionses)
-                .filter((sections) -> sections.isLook||(sections.url != null && sections.index == model.index))
-                .map(sections -> {sections.isLook=(sections.url != null && sections.index == model.index) ? true : false;return sections;})
-                .toList()
+                .filter(sections -> sections.isLook||(sections.url != null && sections.index == model.index))
+                .map(sections -> {sections.isLook = !sections.isLook; return sections;})
                 .subscribe((data)->{
                     SiteDbApi.insertOrUpdate(data);
                 });

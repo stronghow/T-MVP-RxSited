@@ -264,6 +264,6 @@ public class SitedFactory {
      * @return Observable
      */
     private static Observable Observable_NULL(){
-        return Observable.just(new ArrayList<>(0)).compose(RxSchedulers.io_main());
+        return Observable.just(new ArrayList(0)).compose(RxSchedulers.io_main());
     }
 }

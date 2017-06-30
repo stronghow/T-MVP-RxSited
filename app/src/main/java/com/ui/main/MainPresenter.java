@@ -31,7 +31,7 @@ import java.util.HashMap;
 @InstanceFactory
 public class MainPresenter extends MainContract.Presenter {
     @Override
-    public void initAdapterPresenter(AdapterPresenter mAdapterPresenter, HashMap map) {
+    public void initAdapterPresenter(AdapterPresenter<SourceModel> mAdapterPresenter, HashMap map) {
         mAdapterPresenter.setDbRepository(DbFactory::getSource)
                 .setBegin(C.NO_MORE)
                 .fetch();

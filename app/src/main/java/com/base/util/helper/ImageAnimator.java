@@ -53,6 +53,7 @@ public class ImageAnimator {
         int[] mColorDay = mResources.getIntArray(R.array.day_color_tab);
         int[] mColorNight = mResources.getIntArray(R.array.night_color_tab);
         int[] addColors = SpUtil.isNight() ? mColorNight : mColorDay;
+        length = addColors.length;
         for (int i=0;i<Images.length;i++){
             mImages[i] = addImages[i%length];
             mColors[i] = addColors[i%length];

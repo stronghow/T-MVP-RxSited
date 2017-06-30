@@ -42,9 +42,9 @@ public class MyFabBehavior extends CoordinatorLayout.Behavior<View> {
     public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, View child, View target, int dx, int dy, int[] consumed) {
         //dy大于0是向上滚动 小于0是向下滚动
 
-        if (dy >= 0 && !isAnimate && child.getVisibility() == View.VISIBLE) {
+        if (dy >= 50 && !isAnimate && child.getVisibility() == View.VISIBLE) {
             hide(child);
-        } else if (dy < 0 && !isAnimate && child.getVisibility() == View.GONE) {
+        } else if (dy < -50 && !isAnimate && child.getVisibility() == View.INVISIBLE) {
             show(child);
         }
     }
@@ -61,7 +61,7 @@ public class MyFabBehavior extends CoordinatorLayout.Behavior<View> {
 
             @Override
             public void onAnimationEnd(Animator animator) {
-                view.setVisibility(View.GONE);
+                view.setVisibility(View.INVISIBLE);
                 isAnimate = false;
             }
 

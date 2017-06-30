@@ -14,8 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:fitsSystemWindows="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:layout_behavior="android.support.design.widget.AppBarLayoutSpringBehavior">
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            <!--app:layout_behavior="android.support.design.widget.AppBarLayoutSpringBehavior"-->
 
             <android.support.design.widget.CollapsingToolbarLayout
                 android:id="@+id/collapsing_toolbar"
@@ -62,38 +62,52 @@
 
                 </android.support.percent.PercentFrameLayout>
 
+                <android.support.v7.widget.AppCompatImageView
+                    android:id="@+id/setting"
+                    android:layout_width="33dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:layout_marginRight="10dp"
+                    android:contentDescription="@null"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:paddingTop="35dp"
+                    app:srcCompat="@mipmap/ic_search"/>
+
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:layout_marginBottom="48dp"
-                    app:layout_collapseMode="pin"
-                    app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-                <com.arlib.floatingsearchview.FloatingSearchView
-                    android:id="@+id/search"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:floatingSearch_searchHint="Search..."
-                    app:floatingSearch_suggestionsListAnimDuration="250"
-                    app:floatingSearch_showSearchKey="false"
-                    app:floatingSearch_leftActionMode="showHamburger"
-                    app:floatingSearch_close_search_on_keyboard_dismiss="true">
-
-                </com.arlib.floatingsearchview.FloatingSearchView>
-
-                <android.support.design.widget.TabLayout
-                    android:id="@+id/tabs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    app:tabGravity="fill"
-                    app:tabMode="scrollable"
-                    app:tabIndicatorColor="?attr/colorWhite"
-                    app:tabSelectedTextColor="@color/colorWhite" />
+                    android:gravity="bottom"
+                    app:layout_collapseMode="pin"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" >
+                    <android.support.design.widget.TabLayout
+                        android:id="@+id/tabs"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        app:tabMode="scrollable"
+                        app:tabIndicatorColor="?attr/colorWhite"
+                        app:tabSelectedTextColor="@color/colorWhite"/>
+                </android.support.v7.widget.Toolbar>
+
+
+                <!--<com.arlib.floatingsearchview.FloatingSearchView-->
+                    <!--android:id="@+id/search"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--app:floatingSearch_searchHint="Search..."-->
+                    <!--app:floatingSearch_suggestionsListAnimDuration="250"-->
+                    <!--app:floatingSearch_showSearchKey="false"-->
+                    <!--app:floatingSearch_leftActionMode="showHamburger"-->
+                    <!--app:floatingSearch_close_search_on_keyboard_dismiss="true">-->
+
+                <!--</com.arlib.floatingsearchview.FloatingSearchView>-->
 
             </android.support.design.widget.CollapsingToolbarLayout>
-
 
         </android.support.design.widget.AppBarLayout>
 

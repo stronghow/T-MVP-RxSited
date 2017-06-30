@@ -89,7 +89,7 @@ public class AdapterPresenter<M> {
 
     public void fetch() {
         Refreshing = true;
-        KLog.json("fetch() ");
+        KLog.json("fetch()");
         getData();
         //view.reSetEmpty();
     }
@@ -99,26 +99,20 @@ public class AdapterPresenter<M> {
         getNetData();
     }
 
-    private void getData(){
-        getDbData(); //先读缓存
-    }
 
-    private void getDbData() {
+    private void getData() {
         begin++;
         param.put(C.PAGE, begin);
-        KLog.json("getDbData");
         if (mDbRepository != null) {
             mDbSubscription = mDbRepository
                     .getData(param)
                     .subscribe(r -> {
                                 if (r == null || r.size() == 0) {
-                                    KLog.json("getNetData()");
                                     begin--; //抵消前面的begin++
                                     getNetData();
                                 } else {
                                     Refreshing = false;
-                                    KLog.json("setDbData()");
-                                    KLog.json("DBlist.size()=" + r.size());
+                                    KLog.json("getDbData()");
                                     view.setDBData(r, begin);
                                 }
                             },

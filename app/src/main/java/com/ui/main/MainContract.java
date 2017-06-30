@@ -5,6 +5,7 @@ import android.content.Intent;
 import com.base.BasePresenter;
 import com.base.BaseView;
 import com.base.adapter.AdapterPresenter;
+import com.model.SourceModel;
 
 import java.util.HashMap;
 
@@ -19,7 +20,7 @@ public interface MainContract {
 
     abstract class Presenter extends BasePresenter<View>{
 
-        public abstract void initAdapterPresenter(AdapterPresenter mAdapterPresenter, HashMap map);
+        public abstract void initAdapterPresenter(AdapterPresenter<SourceModel> mAdapterPresenter, HashMap map);
 
         public abstract boolean forIntent(Intent intent, boolean isNewIntent);
 

@@ -40,6 +40,7 @@ public class MainActivity extends BaseActivity<MainPresenter,ActivityMainBinding
 
     @Override
     public void initView() {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mViewBinding.dlMainDrawer, R.string.drawer_open, R.string.drawer_close);
         mDrawerToggle.syncState();
         mViewBinding.dlMainDrawer.addDrawerListener(mDrawerToggle);

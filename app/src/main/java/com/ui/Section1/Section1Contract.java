@@ -3,6 +3,7 @@ package com.ui.Section1;
 import com.base.BasePresenter;
 import com.base.BaseView;
 import com.base.adapter.AdapterPresenter;
+import com.model.PicModel;
 
 import java.util.HashMap;
 
@@ -16,7 +17,7 @@ public interface Section1Contract {
     }
 
     abstract class Presenter extends BasePresenter<View>{
-        public abstract void initAdapterPresenter(AdapterPresenter mAdapterPresenter, HashMap map);
+        public abstract void initAdapterPresenter(AdapterPresenter<PicModel> mAdapterPresenter, HashMap map);
 
         @Override
         public void onAttached() {

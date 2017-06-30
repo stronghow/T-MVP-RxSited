@@ -6,11 +6,11 @@ import com.base.util.ToastUtil;
 import com.base.util.helper.RxSchedulers;
 import com.socks.library.KLog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 import io.realm.RealmObject;
 
 /**
@@ -26,9 +26,10 @@ public class DataPresenter<T extends RealmObject> {
     private HashMap<String, Object> param = new HashMap<>();//设置远程网络仓库钥匙
     private DbRepository<T> mDbRepository;
     //    private boolean isCACHE_NETWORK; //缓存和网络一起
-    private boolean Refreshing = false;
-    private Disposable mDbSubscription;
-    private Disposable mNetSubscription;
+//    private Disposable mDbSubscription;
+//    private Disposable mNetSubscription;
+
+    private DataPresenter(){}
 
     public  static <T extends RealmObject> DataPresenter<T> getInstance(Class<T> type){
         return new DataPresenter<>();
@@ -63,65 +64,47 @@ public class DataPresenter<T extends RealmObject> {
 //        return this;
 //    }
 
-    public void setRefreshing(boolean refreshing) {
-        Refreshing = refreshing;
-    }
-
-    public boolean isRefreshing() {
-        return Refreshing;
-    }
-
     public Observable<List<T>> fetch() {
-        Refreshing = true;
-        KLog.json("DataPresenter::fetch");
         return getDataT();
     }
 
 
-    public Observable<List<T>> getNetDataT(){
+    private Observable<List<T>> getNetDataT(){
+        KLog.json("fromNet");
         if(NetWorkUtil.isNetConnected(App.getContext()) && mNetRepository != null)
             return mNetRepository.getData(param)
                     .compose(RxSchedulers.io_main());
         else {
             ToastUtil.show("请连接网络");
-            return Observable.empty();
+            return Observable_NULL();
         }
     }
 
-    public Observable<List<T>> getDbDataT() {
-            if(mDbRepository != null)
-                return mDbRepository
-                        .getData(param)
-                        .flatMap(ts -> {
-                                if (ts != null && ts.size() > 0) {
-                                    KLog.json("DataPresenter::getDbData -> null");
-                                    return Observable.just(ts).compose(RxSchedulers.io_main());
-                                }
-                                else return getNetDataT();
-                        });
-            else return getNetDataT();
-    }
-
-
-    public Observable<List<T>> getDataT(){
+    private Observable<List<T>> getDataT(){
         if(mDbRepository != null)
             return mDbRepository
                     .getData(param)
                     .flatMap(ts -> {
                         if (ts != null && ts.size() > 0) {
-                            KLog.json("DataPresenter::getDbData -> null");
-                            return Observable.just(ts)
-                                    .compose(RxSchedulers.io_main());
+                            KLog.json("fromDb");
+                            return Observable.just(ts).compose(RxSchedulers.io_main());
                         }
-                        else return getNetDataT();
+
+                        else
+                            return getNetDataT();
                     });
-        else return getNetDataT();
+        else
+            return getNetDataT();
     }
 
-    public void unsubscribe(){
-        if(mNetSubscription != null && !mNetSubscription.isDisposed())
-            mNetSubscription.dispose();
-        if(mDbSubscription != null && !mDbSubscription.isDisposed())
-            mDbSubscription.dispose();
+//    public void unsubscribe(){
+//        if(mNetSubscription != null && !mNetSubscription.isDisposed())
+//            mNetSubscription.dispose();
+//        if(mDbSubscription != null && !mDbSubscription.isDisposed())
+//            mDbSubscription.dispose();
+//    }
+
+    private Observable<List<T>> Observable_NULL(){
+        return Observable.just(new ArrayList<T>(0)).compose(RxSchedulers.io_main());
     }
 }

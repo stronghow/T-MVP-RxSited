@@ -10,6 +10,7 @@ import com.base.BaseActivity;
 import com.base.entity.DataExtra;
 import com.base.util.BindingUtils;
 import com.base.util.helper.RxSchedulers;
+import com.dao.db.SiteDbApi;
 import com.model.Sections;
 import com.model.Tag;
 import com.socks.library.KLog;
@@ -58,6 +59,7 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
             ((Sections)mViewBinding.listItem.getCoreAdapter().getItemList().get(C.oldIndex)).isLook = false;
             mViewBinding.listItem.getCoreAdapter().notifyItemChanged(C.oldIndex);
             mViewBinding.listItem.getCoreAdapter().notifyItemChanged(C.newIndex);
+            SiteDbApi.updateLastlook(C.sSectionses.get(C.oldIndex), C.sSectionses.get(C.newIndex));
             C.oldIndex  = C.newIndex; //更新之后，原来新的位置变成了旧的
             mViewBinding.listItem.moveToposition(C.newIndex);
         }else{

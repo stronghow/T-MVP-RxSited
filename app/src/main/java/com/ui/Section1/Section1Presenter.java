@@ -5,6 +5,8 @@ import com.DbFactory;
 import com.SitedFactory;
 import com.app.annotation.apt.InstanceFactory;
 import com.base.adapter.AdapterPresenter;
+import com.model.PicModel;
+import com.model.Section;
 
 import java.util.HashMap;
 
@@ -16,7 +18,7 @@ import java.util.HashMap;
 public class Section1Presenter extends Section1Contract.Presenter {
 
     @Override
-    public void initAdapterPresenter(AdapterPresenter mAdapterPresenter, HashMap map) {
+    public void initAdapterPresenter(AdapterPresenter<PicModel> mAdapterPresenter, HashMap map) {
         mAdapterPresenter
                 .setNetRepository(SitedFactory::getSection)
                 .setDbRepository(DbFactory::getSection)

@@ -264,7 +264,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         //先从RecyclerView的LayoutManager中获取第一项和最后一项的Position
         int firstItem = mLayoutManager.findFirstVisibleItemPosition();
         int lastItem =  mLayoutManager.findLastVisibleItemPosition();
-        KLog.json("getChildCount=" + recyclerview.getChildCount() + "\nfirstItem=" + firstItem +"\nlastItem=" +lastItem);
+//        KLog.json("getChildCount=" + recyclerview.getChildCount() + "\nfirstItem=" + firstItem +"\nlastItem=" +lastItem);
         float firstItemY = recyclerview.getChildAt(0).getTop();  //获取的是可见的itemview
         float lastItemY = recyclerview.getChildAt(lastItem-firstItem).getTop();
         //然后区分情况
