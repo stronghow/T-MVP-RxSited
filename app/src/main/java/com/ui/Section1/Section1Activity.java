@@ -13,8 +13,8 @@ import com.app.annotation.apt.Extra;
 import com.app.annotation.apt.Router;
 import com.base.BaseActivity;
 import com.base.entity.DataExtra;
-import com.dao.db.SiteDbApi;
 import com.model.Sections;
+import com.sited.RxSource;
 import com.socks.library.KLog;
 import com.ui.main.R;
 import com.ui.main.databinding.ActivitySitedSectionBinding;
@@ -28,6 +28,9 @@ import com.ui.main.databinding.ActivitySitedSectionBinding;
 public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySitedSectionBinding> implements Section1Contract.View {
     @Extra(C.MODEL)
     public Sections model;
+
+    @Extra(C.SOURCE)
+    public RxSource rxSource;
 
     private BatteryReceiver batteryReceiver;
 
@@ -46,7 +49,10 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
     public void initView() {
         mViewBinding.listItem.getTextView().setVisibility(View.VISIBLE);
         mViewBinding.listItem.setHashMap(C.BOOKNAME,model.name);
-        mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(), DataExtra.getExtra(C.MODEL,model));
+        mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(), DataExtra.create()
+                .add(C.MODEL,model)
+                .add(C.SOURCE,rxSource)
+                .build());
     }
 
     @Override

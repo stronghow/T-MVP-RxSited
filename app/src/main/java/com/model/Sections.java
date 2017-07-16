@@ -23,10 +23,6 @@ public class Sections extends RealmObject{
 	//pic total
 	public int total;
 
-	public int _code;
-
-	//public DdNode _config;
-
 	public int downTotal;
 	public int downProgress;
 
@@ -35,12 +31,4 @@ public class Sections extends RealmObject{
 	public String QueryKey;
 
 	public boolean isLook;
-
-	public int code(){
-		if(_code==0 && url != null) {
-			_code = url.hashCode();
-		}
-
-		return _code;
-	}
 }

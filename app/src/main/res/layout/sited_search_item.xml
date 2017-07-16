@@ -1,5 +1,5 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -11,7 +11,7 @@
 
         <variable
             name="item"
-            type="com.model.Tag" />
+            type="com.model.Search" />
     </data>
 
     <android.support.v7.widget.CardView
@@ -19,13 +19,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/card_margin"
         android:foreground="?attr/selectableItemBackground"
-
+        android:onClick="@{()->RouterHelper.go(C.BOOK1,DataExtra.getExtra(C.MODEL,item),image)}"
         android:paddingLeft="8dp"
         android:background="?attr/backgroundCard"
         android:paddingRight="8dp"
         android:paddingTop="8dp">
-
-        <!--android:onClick="@{()->RouterHelper.go(C.BOOK1,DataExtra.getExtra(C.MODEL,item),image)}"-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -45,7 +43,6 @@
                     android:layout_width="120dp"
                     android:layout_height="120dp"
                     android:scaleType="centerCrop"
-                    android:transitionName="image"
                     app:imageUrl="@{item.logo}"
                     app:refUrl="@{item.url}"/>
             </LinearLayout>

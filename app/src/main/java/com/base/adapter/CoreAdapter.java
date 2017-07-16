@@ -17,29 +17,47 @@ import java.util.List;
 /**
  * Created by baixiaokang on 16/12/27.
  */
-
-public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder> {
+@SuppressWarnings("unchecked")
+public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
+    private final boolean needHint;
     private TypeSelector<M> mTypeSelector;
     private List<M> mItemList = new ArrayList<>();
     public boolean isHasMore = true;
+    public boolean isRefetch = false;
     private List<Item> mHeadTypeDatas = new ArrayList<>();
     private List<Item> mFootTypeDatas = new ArrayList<>();
     private int viewType;
     private int mFooterViewType = R.layout.list_footer_view;
 
+    private BaseViewHolder.ItemClickListener mItemClickListener;
+    private BaseViewHolder.ItemLongClickListener mItemLongClickListener;
+
+
     @Override
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new BaseViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), viewType, parent, false));
+        return new BaseViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), viewType, parent, false),
+                mItemClickListener,mItemLongClickListener);
     }
 
-    CoreAdapter() {
+    CoreAdapter(boolean needHint) {
+        this.needHint = needHint;
         mFootTypeDatas.add(new Item(mFooterViewType, true));
     }
 
     @Override
     public void onBindViewHolder(BaseViewHolder holder, int position) {
-        holder.mViewDataBinding.setVariable(BR.item, getItem(position));
-        holder.mViewDataBinding.executePendingBindings();
+        Object item = getItem(position);
+        if (needHint && holder.itemView.getTag() == null) {
+            holder.itemView.setTag(item);
+            holder.itemView.postDelayed(() -> {
+                    holder.mViewDataBinding.setVariable(BR.item, holder.itemView.getTag());
+                    holder.mViewDataBinding.executePendingBindings();
+            }, 800);
+        } else {
+            if (needHint) holder.itemView.setTag(item);
+            holder.mViewDataBinding.setVariable(BR.item, item);
+            holder.mViewDataBinding.executePendingBindings();
+        }
     }
 
 //    @Override
@@ -82,7 +100,7 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder> {
         }
     }
 
-    public List getItemList(){
+    public List<M> getItemList(){
         return this.mItemList;
     }
 
@@ -104,6 +122,11 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder> {
         return mItemList.size() + mHeadTypeDatas.size() + mFootTypeDatas.size();
     }
 
+    public void notifyDataSetChanged(List<M> data){
+        this.mItemList = data;
+        notifyDataSetChanged();
+    }
+
     public void setBeans(List<M> data, int begin) {
         if (data == null) {
             this.isHasMore = false;
@@ -111,8 +134,13 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder> {
         }
         KLog.json("setBeans::begin="+begin);
         this.isHasMore = (data.size() > 0 && begin > 0);
-        if (begin > 1) this.mItemList.addAll(data);
-        else this.mItemList = data;
+        if(isRefetch) {
+            this.mItemList = data;
+            isRefetch = false;
+        }
+        else this.mItemList.addAll(data);
+//        if (begin > 1) this.mItemList.addAll(data);
+//        else this.mItemList = data;
         notifyDataSetChanged();
     }
 
@@ -124,5 +152,21 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder> {
             this.type = type;
             this.data = data;
         }
+    }
+
+
+
+    /**
+     * 设置Item点击监听
+     * @param listener
+     */
+    public CoreAdapter<M> setOnItemClickListener(BaseViewHolder.ItemClickListener listener){
+        this.mItemClickListener = listener;
+        return this;
+    }
+
+    public CoreAdapter<M> setOnItemLongClickListener(BaseViewHolder.ItemLongClickListener listener){
+        this.mItemLongClickListener = listener;
+        return this;
     }
 }

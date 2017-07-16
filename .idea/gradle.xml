@@ -12,8 +12,6 @@
             <option value="$PROJECT_DIR$/apt" />
             <option value="$PROJECT_DIR$/lib" />
             <option value="$PROJECT_DIR$/plugin" />
-            <option value="$PROJECT_DIR$/sited" />
-            <option value="$PROJECT_DIR$/using" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

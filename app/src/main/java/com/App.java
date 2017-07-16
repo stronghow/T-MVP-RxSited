@@ -6,29 +6,26 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
-import android.util.DisplayMetrics;
 
 import com.app.annotation.aspect.TimeLog;
 import com.base.util.SpUtil;
-import com.dao.SourceApi;
-import com.dao.db.migration;
-import com.dao.engine.DdApi;
-import com.dao.engine.DdLogListener;
-import com.dao.engine.DdNodeFactory;
+import com.sited.RxSource;
 import com.socks.library.KLog;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.util.Stack;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by baixiaokang on 16/4/23.
  */
 public class App extends Application {
     private static App mCurrent;
+    private static OkHttpClient mHttpClient;
     public static Stack<Activity> store;
-
+    private static RefWatcher refWatcher;
     @TimeLog
     public void onCreate() {
         super.onCreate();
@@ -36,21 +33,47 @@ public class App extends Application {
 
         KLog.init(true,"RxSited_Log");
 
-        DdApi.tryInit(new DdNodeFactory(), new DdLogListener());
-        SourceApi.tryInit();
+        RxSource.init(this);
+
+//        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+//        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor("OKGo");
+//        loggingInterceptor.setPrintLevel(HttpLoggingInterceptor.Level.BODY);
+//        loggingInterceptor.setColorLevel(Level.INFO);
+//        builder.addInterceptor(loggingInterceptor);
+//
+//        OkGo.getInstance().init(this)
+//                .setOkHttpClient(builder.build());
+
         Realm.init(this);
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .schemaVersion(0) // Must be bumped when the schema changes
-                .migration(new migration()) // Migration to run instead of throwing an exception
-                .build();
-        Realm.setDefaultConfiguration(config);
+//        RealmConfiguration config = new RealmConfiguration.Builder()
+//                .schemaVersion(0) // Must be bumped when the schema changes
+//                .migration(new migration()) // Migration to run instead of throwing an exception
+//                .build();
+//        Realm.setDefaultConfiguration(config);
 
         SpUtil.init(this);
 
         AppCompatDelegate.setDefaultNightMode(SpUtil.isNight() ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         store = new Stack<>();
         registerActivityLifecycleCallbacks(new SwitchBackgroundCallbacks());
+        //loadLeak();
     }
+
+    public static OkHttpClient getHttpClient() {
+        if (mHttpClient == null) {
+            mHttpClient = new OkHttpClient();
+        }
+        return mHttpClient;
+    }
+
+//    private  void loadLeak(){
+//        if(!LeakCanary.isInAnalyzerProcess(this))
+//          refWatcher = LeakCanary.install(this);
+//    }
+//
+//    public static RefWatcher getRefWatcher() {
+//        return refWatcher;
+//    }
 
     public static App getAppContext() {
         return mCurrent;
@@ -104,18 +127,9 @@ public class App extends Application {
         return store.lastElement();
     }
 
-    public static App getCurrent(){
-        return mCurrent;
-    }
-
     public static Context getContext() {
         return mCurrent.getApplicationContext();
     }
-
-    public  static DisplayMetrics getDisplayMetrics(){
-        return getContext().getResources().getDisplayMetrics();
-    }
-
 
     public static SharedPreferences getSettings(String name, int mode){
         return mCurrent.getSharedPreferences(name,mode);

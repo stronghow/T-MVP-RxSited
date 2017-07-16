@@ -22,13 +22,13 @@ public class ViewUtil {
 
     public static int w_screen(){
         //DisplayMetrics dm = new DisplayMetrics();
-       return App.getCurrent().getCurActivity().getWindowManager().getDefaultDisplay().getWidth();
+       return App.getAppContext().getCurActivity().getWindowManager().getDefaultDisplay().getWidth();
         //return dm.widthPixels;
     }
 
     public static int h_screen(){
 //        DisplayMetrics dm = new DisplayMetrics();
 //        return dm.heightPixels;
-        return App.getCurrent().getCurActivity().getWindowManager().getDefaultDisplay().getHeight();
+        return App.getAppContext().getCurActivity().getWindowManager().getDefaultDisplay().getHeight();
     }
 }

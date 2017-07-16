@@ -7,11 +7,10 @@ import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 /**
- * Created by haozhong on 2017/4/18.
+ * Created by haozhong on 2017/7/13.
  */
 
-public class Tag extends RealmObject{
-
+public class Search extends RealmObject {
     @PrimaryKey
     public String url;
     public String name;

@@ -7,11 +7,19 @@ import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.C;
 import com.app.annotation.apt.Router;
+import com.apt.TRouter;
 import com.base.BaseActivity;
+import com.base.adapter.BaseViewHolder;
+import com.base.entity.DataExtra;
 import com.base.util.SpUtil;
+import com.base.util.helper.RouterHelper;
+import com.model.SourceModel;
+import com.sited.RxSource;
+import com.sited.RxSourceApi;
 import com.ui.main.databinding.ActivityMainBinding;
 
 /**
@@ -46,6 +54,18 @@ public class MainActivity extends BaseActivity<MainPresenter,ActivityMainBinding
         mViewBinding.dlMainDrawer.addDrawerListener(mDrawerToggle);
         mPresenter.forIntent(getIntent(),false);
         mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(),null);
+        mViewBinding.listItem.getCoreAdapter().setOnItemClickListener(new BaseViewHolder.ItemClickListener() {
+            @Override
+            public void onItemClick(View view, int postion) {
+                SourceModel item = (SourceModel) mViewBinding.listItem.getCoreAdapter().getItem(postion);
+                RxSource rxSource;
+                rxSource = RxSource.get(item.url);
+                if(rxSource == null) rxSource = RxSourceApi.getRxSource(item.sited);
+                RouterHelper.go(C.TAG, DataExtra.create()
+                        .add(C.SOURCE, rxSource)
+                        .add(C.URL,item.url).build());
+            }
+        });
     }
 
     @Override
@@ -57,16 +77,22 @@ public class MainActivity extends BaseActivity<MainPresenter,ActivityMainBinding
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home)
-            mViewBinding.dlMainDrawer.openDrawer(GravityCompat.START);
+        switch (item.getItemId()){
+            case R.id.action_theme:
+                SpUtil.setNight(mContext, !SpUtil.isNight());
+                break;
+            case android.R.id.home:
+                mViewBinding.dlMainDrawer.openDrawer(GravityCompat.START);
+                break;
+            case R.id.action_search:
+                TRouter.go(C.SEARCH);
+                break;
+        }
         return true;
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.nav_theme) SpUtil.setNight(mContext, !SpUtil.isNight());
-        else if (item.getItemId() == android.R.id.home)
-            mViewBinding.dlMainDrawer.openDrawer(GravityCompat.START);
         return true;
     }
 

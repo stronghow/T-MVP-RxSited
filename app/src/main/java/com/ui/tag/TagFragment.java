@@ -9,11 +9,15 @@ import android.view.ViewGroup;
 
 import com.C;
 import com.DbFactory;
-import com.SitedFactory;
+import com.NetFactory;
 import com.base.adapter.AdapterPresenter;
+import com.base.adapter.BaseViewHolder;
 import com.base.adapter.TRecyclerView;
-import com.dao.engine.DdSource;
+import com.base.entity.DataExtra;
+import com.base.util.helper.RouterHelper;
+import com.model.Tag;
 import com.model.Tags;
+import com.sited.RxSource;
 import com.ui.main.R;
 
 
@@ -22,12 +26,11 @@ import com.ui.main.R;
  */
 
 public class TagFragment extends Fragment {
-    private TRecyclerView tRecyclerView;
-    private String type;
+    private TRecyclerView<Tag> tRecyclerView;
     private Tags model;
-    private DdSource source;
+    private RxSource source;
 
-    public static TagFragment newInstance(String type,DdSource source,Tags model){
+    public static TagFragment newInstance(RxSource source, Tags model){
         TagFragment tagFragment = new TagFragment();
         tagFragment.source = source;
         tagFragment.model = model;
@@ -41,36 +44,29 @@ public class TagFragment extends Fragment {
         if(tRecyclerView == null){
             tRecyclerView = new TRecyclerView(getContext());
             tRecyclerView.setViewType(R.layout.sited_tag_item);
-            if(model.isSearch){
-                tRecyclerView.setRefreshable(false);
-                tRecyclerView.getPresenter()
-                        .setNetRepository(SitedFactory::getTag)
-                        .setParam(C.SOURCE,source)
-                        .setParam(C.MODEL,model)
-                        .setBegin(C.NO_MORE)
-                        .fetch();
-            }else{
-                tRecyclerView.getPresenter()
-                        .setNetRepository(SitedFactory::getTag)
-                        .setDbRepository(DbFactory::getTag)
-                        .setParam(C.SOURCE,source)
-                        .setParam(C.MODEL,model)
-                        .fetch();
-            }
+            tRecyclerView.getCoreAdapter().setOnItemClickListener(new BaseViewHolder.ItemClickListener() {
+                @Override
+                public void onItemClick(View view, int postion) {
+                    View view1 = View.inflate(getContext(),R.layout.sited_tag_item ,null);
+                    Tag item = (Tag) tRecyclerView.getCoreAdapter().getItem(postion);
+                    RouterHelper.go(C.BOOK1, DataExtra.create()
+                                                    .add(C.MODEL,item)
+                                                    .add(C.SOURCE,source)
+                                                    .build(),view1.findViewById(R.id.image));
+                }
+            });
+            tRecyclerView.getPresenter()
+                    .setNetRepository(NetFactory::getTag)
+                    .setDbRepository(DbFactory::getTag)
+                    .setParam(C.SOURCE,source)
+                    .setParam(C.MODEL,model)
+                    .fetch();
         }
         return  tRecyclerView;
     }
 
     public AdapterPresenter getPresenter(){
        return tRecyclerView.getPresenter();
-    }
-
-    public void updateData(String key){
-        model.url = key;
-        tRecyclerView.getPresenter()
-                .setParam(C.MODEL,model)
-                .setBegin(C.NO_MORE)
-                .fetch_Net();
     }
 
     @Override

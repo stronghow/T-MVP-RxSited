@@ -82,9 +82,7 @@ public class BindingUtils {
                     public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                         int img_width = resource.getWidth();
                         int img_height = resource.getHeight();
-                        //KLog.json("img_width="+img_width + "img_height" +img_height);
                         int height = (int)(1.0 * img_height * ViewUtil.w_screen() / img_width);
-                        //KLog.json("height="+ height + "ViewUtil.w_screen()=" + ViewUtil.w_screen());
                         ViewGroup.LayoutParams para = v.getLayoutParams();
                         para.height = height;
                         para.width = ViewUtil.w_screen();

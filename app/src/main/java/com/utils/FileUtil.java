@@ -39,7 +39,7 @@ public class FileUtil {
     }
 
     public static void copy(String txt) {
-        final ClipboardManager cli = (ClipboardManager) App.getCurrent().getSystemService(Context.CLIPBOARD_SERVICE);
+        final ClipboardManager cli = (ClipboardManager) App.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
         cli.setPrimaryClip(ClipData.newPlainText("text", txt));
     }
 }

@@ -13,13 +13,12 @@ import com.app.annotation.apt.InstanceFactory;
 import com.apt.TRouter;
 import com.base.adapter.AdapterPresenter;
 import com.base.util.ToastUtil;
-import com.dao.SourceApi;
 import com.dao.db.SiteDbApi;
-import com.dao.engine.DdSource;
 import com.model.SourceModel;
+import com.sited.RxSource;
+import com.sited.RxSourceApi;
 import com.socks.library.KLog;
 import com.utils.Base64Util;
-import com.utils.CallUtil;
 import com.utils.FileUtil;
 
 import java.util.HashMap;
@@ -77,33 +76,33 @@ public class MainPresenter extends MainContract.Presenter {
         try {
             ContentResolver cr = App.getContext().getContentResolver();
             String sited = FileUtil.toString(cr.openInputStream(url));
-
-            DdSource sd = SourceApi.loadSource(sited, null, true);
+            RxSource sd = RxSourceApi.getRxSource(cr.openInputStream(url));
             if (sd != null) {
                 SourceModel sourceModel = new SourceModel();
                 sourceModel.title = sd.title;
                 sourceModel.url = sd.url;
                 sourceModel.sited = sited;
-                sourceModel.cookies = sd.cookies();
+                //sourceModel.cookies = sd.cookies();
                 SiteDbApi.insertOrUpdate(sourceModel);
-                sd.sited = null;
+                //sd.sited = null;
 
                 ToastUtil.show("插件已成功安装");
 
-                CallUtil.asynCall(() -> {
-                    HashMap map = new HashMap();
-                    map.put(C.URL,null);
-                    map.put(C.SOURCE,sd);
-                    TRouter.go(C.TAG,map);
-                });
+                HashMap map = new HashMap();
+                map.put(C.URL,null);
+                map.put(C.SOURCE,sd);
+                TRouter.go(C.TAG,map);
                 return true;
             } else {
                 ToastUtil.show("插件格式有问题");
                 return false;
             }
-
         } catch (Exception ex) {
+            for(StackTraceElement element : ex.getStackTrace()){
+                KLog.json(element.toString());
+            }
             ex.printStackTrace();
+            KLog.file("RxSited",App.getAppContext().getExternalFilesDir(null),"RxSited_log.txt",ex.getMessage());
             ToastUtil.show("出错：" + ex.getMessage());
             return false;
         }

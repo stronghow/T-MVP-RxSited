@@ -14,11 +14,13 @@ public class RouterHelper {
     
     //@SingleClick // 防止连续点击
     public static void go(String actionName, HashMap data, View view) {
+        if (data.containsValue(null)) return;
         TRouter.go(actionName, data, view);
     }
 
 //    @SingleClick // 防止连续点击
     public static void go(String actionName, HashMap data) {
+        if (data.containsValue(null)) return;
         TRouter.go(actionName, data);
     }
 }

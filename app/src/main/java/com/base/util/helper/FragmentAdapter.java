@@ -4,19 +4,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.model.Tags;
-import com.ui.tag.TagFragment;
+import com.base.entity.ItemTitle;
 
 import java.util.List;
 
 /**
  * Created by baixiaokang on 16/5/8.
  */
-public class FragmentAdapter extends FragmentStatePagerAdapter {
-    private List<TagFragment> mFragments;
-    private List<Tags> mTitles;
+public class FragmentAdapter<T extends ItemTitle,F extends Fragment> extends FragmentStatePagerAdapter {
+    private List<F> mFragments;
+    private List<T> mTitles;
 
-    public static FragmentAdapter newInstance(FragmentManager fm, List<TagFragment> fragments, List<Tags> titles) {
+    public static <T,F> FragmentAdapter newInstance(FragmentManager fm, List<T> titles, List<F> fragments) {
         FragmentAdapter mFragmentAdapter = new FragmentAdapter(fm);
         mFragmentAdapter.mFragments = fragments;
         mFragmentAdapter.mTitles = titles;
@@ -39,6 +38,12 @@ public class FragmentAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return mTitles.get(position).title;
+        return mTitles.get(position).getTitle();
+    }
+
+    public void addFragment(T title,F fragment){
+        mTitles.add(title);
+        mFragments.add(fragment);
+        notifyDataSetChanged();
     }
 }

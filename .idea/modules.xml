@@ -7,8 +7,6 @@
       <module fileurl="file://$PROJECT_DIR$/apt/apt.iml" filepath="$PROJECT_DIR$/apt/apt.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib/lib.iml" filepath="$PROJECT_DIR$/lib/lib.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugin/plugin.iml" filepath="$PROJECT_DIR$/plugin/plugin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sited/sited.iml" filepath="$PROJECT_DIR$/sited/sited.iml" />
-      <module fileurl="file://$PROJECT_DIR$/using/using.iml" filepath="$PROJECT_DIR$/using/using.iml" />
     </modules>
   </component>
 </project>

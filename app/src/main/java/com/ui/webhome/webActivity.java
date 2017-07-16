@@ -88,44 +88,11 @@ public class webActivity extends DataBindingActivity<ActivityWebBinding>{
                                 webUrl = Base64Util.decode(host);
                             }
 
-                           RxRouter.navByUri(webActivity.this, webUrl);
+                           RxRouter.navByUri(webUrl);
                         }
                     }else{
                         view.loadUrl(url);
                     }
-//                    else {
-//                        if(isWebOnly==false) {
-//                            DdSource temp = SourceApi.getByUrl(url);
-//                            if (temp != null) {
-//                                activity.onBackPressedHandler = null;
-//
-//                                DdNode cfg = temp.book(url);
-//                                if (cfg.isMatch(url)) {
-//                                    Navigation.showSiteBook(wseft, url, cfg.dtype());
-//                                } else {
-//                                    Navigation.showSiteMain(wseft, temp.url, temp.title);
-//                                }
-//
-////                                webView.setVisibility(View.GONE);
-//                            } else {
-//                                view.loadUrl(url);
-//
-//                                if (webUrl.indexOf(".bing.") > 0) {
-//                                    tryLoadAddin(url);
-//                                }
-//                            }
-//                        }else {
-//                            if (url.startsWith("http")) {
-//                                if (url.indexOf(".sited") > 0) {
-//                                   Navigation.navByUri(wseft, url);
-//                                } else {
-//                                    view.loadUrl(url);
-//                                }
-//                            } else
-//                              Navigation.showOutUri(activity, url);
-//                        }
-//                    }
-
                     return true;
                 }
             });

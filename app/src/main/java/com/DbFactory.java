@@ -3,12 +3,10 @@ package com;
 import android.text.TextUtils;
 
 import com.base.util.helper.RxSchedulers;
-import com.dao.SourceApi;
-import com.dao.engine.DdSource;
 import com.model.Hots;
 import com.model.LookModel;
-import com.model.MainViewModel;
 import com.model.PicModel;
+import com.model.Search;
 import com.model.Sections;
 import com.model.SourceModel;
 import com.model.Tag;
@@ -16,14 +14,11 @@ import com.model.Tags;
 import com.socks.library.KLog;
 import com.ui.Section1.Section1Activity;
 
-import org.noear.sited.SdSourceCallback;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.Flowable;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -41,8 +36,8 @@ public class DbFactory {
      * @param param
      * @return Observable
      */
-    public static Observable<List<SourceModel>> getSource(HashMap<String, Object> param){
-        return Observable.just(
+    public static Flowable<List<SourceModel>> getSource(HashMap<String, Object> param){
+        return Flowable.just(
                 Realm.getDefaultInstance().copyFromRealm(
                 Realm.getDefaultInstance()
                 .where(SourceModel.class)
@@ -57,32 +52,8 @@ public class DbFactory {
      * @param param HashMap<String, Object> param
      * @return Observable
      */
-    public static Observable<RealmResults<Hots>> getHots(HashMap<String, Object> param){
-        PublishSubject mSubject = PublishSubject.create();
-        KLog.json("进入Observable");
-        DdSource source = (DdSource) param.get(C.SOURCE);
-        if(source == null){
-            source = SourceApi.getByUrl((String)param.get(C.URL));
-            if(source == null) {
-                KLog.json("source == null");
-                mSubject.onNext(null);
-                mSubject.onComplete();
-            }
-        }
-
-        MainViewModel viewModel = new MainViewModel();
-        source.getNodeViewModel(viewModel, source.home, (boolean) param.get(C.ISUPDATE), new SdSourceCallback() {
-            @Override
-            public void run(Integer code) {
-                if(code == 1) {
-                    KLog.json("tagList.size:"+viewModel.tagList.size());
-                    mSubject.onNext(viewModel.hotList);
-                    mSubject.onComplete();
-                }
-            }
-        });
-
-        return mSubject.compose(RxSchedulers.io_main());
+    public static Flowable<RealmResults<Hots>> getHots(HashMap<String, Object> param){
+        return null;
     }
 
     /**
@@ -90,8 +61,8 @@ public class DbFactory {
      * @param param HashMap<String, Object> param
      * @return Observable
      */
-    public static Observable<List<Tags>> getTags(HashMap<String, Object> param){
-        return Observable.just(
+    public static Flowable<List<Tags>> getTags(HashMap<String, Object> param){
+        return Flowable.just(
                 Realm.getDefaultInstance().copyFromRealm(
                 Realm.getDefaultInstance()
                 .where(Tags.class)
@@ -106,15 +77,30 @@ public class DbFactory {
      * @param param HashMap<String, Object> param
      * @return Observable
      */
-    public static Observable<List<Tag>> getTag(HashMap<String, Object> param){
+    public static Flowable<List<Tag>> getTag(HashMap<String, Object> param){
         KLog.json("getTag=" + ((Tags)param.get(C.MODEL)).url + param.get(C.PAGE));
-        return Observable.just(
-                        Realm.getDefaultInstance().copyFromRealm(
+        return Flowable.just(
+                Realm.getDefaultInstance().copyFromRealm(
                         Realm.getDefaultInstance()
-                        .where(Tag.class)
-                        .equalTo(QueryKey,((Tags)param.get(C.MODEL)).url + param.get(C.PAGE))
-                        .findAll()))
-                        .compose(RxSchedulers.io_main());
+                                .where(Tag.class)
+                                .equalTo(QueryKey,((Tags)param.get(C.MODEL)).url + param.get(C.PAGE))
+                                .findAll()))
+                .compose(RxSchedulers.io_main());
+    }
+
+    /**
+     * @apiNote 获取Search节点本地数据
+     * @param param HashMap<String, Object> param
+     * @return Observable
+     */
+    public static Flowable<List<Search>> getSearch(HashMap<String, Object> param){
+        return Flowable.just(
+                Realm.getDefaultInstance().copyFromRealm(
+                        Realm.getDefaultInstance()
+                                .where(Search.class)
+                                .equalTo(QueryKey,((String)param.get(C.URL)) + param.get(C.KEY))
+                                .findAll()))
+                .compose(RxSchedulers.io_main());
     }
 
     /**
@@ -122,7 +108,7 @@ public class DbFactory {
      * @param param HashMap<String, Object> param
      * @return Observable
      */
-    public static Observable getUpdates(HashMap<String, Object> param){
+    public static Flowable getUpdates(HashMap<String, Object> param){
         return null;
     }
 
@@ -131,7 +117,7 @@ public class DbFactory {
      * @param param HashMap<String, Object> param
      * @return Observable
      */
-    public static Observable<List<Sections>> getBook(HashMap<String, Object> param){
+    public static Flowable<List<Sections>> getBook(HashMap<String, Object> param){
         Tag model = (Tag)param.get(C.MODEL);
         KLog.json("getBook=" + model.url);
         LookModel lookModel = Realm.getDefaultInstance()
@@ -140,8 +126,9 @@ public class DbFactory {
                 .findFirst();
         if(lookModel != null){
             C.oldIndex = lookModel.index;
+            C.isReverse = lookModel.isReverse;
         }
-       return Observable.just(
+       return Flowable.just(
                Realm.getDefaultInstance().copyFromRealm(
                Realm.getDefaultInstance()
                .where(Sections.class)
@@ -156,7 +143,7 @@ public class DbFactory {
      * @param param HashMap<String, Object> param
      * @return Observable
      */
-    public static Observable<List<PicModel>> getSection(HashMap<String, Object> param){
+    public static Flowable<List<PicModel>> getSection(HashMap<String, Object> param){
         KLog.json("DbFactory::getSection");
         Sections model = (Sections) param.get(C.MODEL);
         int index = model.index;
@@ -185,7 +172,7 @@ public class DbFactory {
 
         final String QueryKey = model.url;
 
-        return Observable.just(
+        return Flowable.just(
                 Realm.getDefaultInstance().copyFromRealm(
                 Realm.getDefaultInstance()
                 .where(PicModel.class)
@@ -199,7 +186,7 @@ public class DbFactory {
      * @param
      * @return Observable
      */
-    private static <M> Observable<List<M>> Observable_NULL(){
-        return Observable.just(new ArrayList<M>(0)).compose(RxSchedulers.io_main());
+    private static <M> Flowable<List<M>> Observable_NULL(){
+        return Flowable.just(new ArrayList<M>(0)).compose(RxSchedulers.io_main());
     }
 }

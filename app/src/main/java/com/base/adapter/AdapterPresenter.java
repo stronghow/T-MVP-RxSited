@@ -15,7 +15,7 @@ import io.reactivex.disposables.Disposable;
 /**
  * Created by baixiaokang on 16/12/27.
  */
-
+@SuppressWarnings("unchecked")
 public class AdapterPresenter<M> {
 //    public static final int LOAD_CACHE_ONLY = 0; // 不使用网络，只读取本地缓存数据
 //    public static final int LOAD_DEFAULT = 1; //（默认）根据cache-control决定是否从网络上取数据。
@@ -31,12 +31,16 @@ public class AdapterPresenter<M> {
     private Disposable mDbSubscription;
     private Disposable mNetSubscription;
 
+    private long time = 0; //延时
+
     interface IAdapterView<M> {
         void setEmpty();
 
-        void setNetData(List<M> data, int begin);
+//        void setNetData(List<M> data, int begin);
+//
+//        void setDBData(List<M> data, int begin);
 
-        void setDBData(List<M> data, int begin);
+        void setData(List<M> data, int begin);
 
         void reSetEmpty();
     }
@@ -51,6 +55,12 @@ public class AdapterPresenter<M> {
 
     public AdapterPresenter<M> setNetRepository(NetRepository<M> mNetRepository) {
         this.mNetRepository = mNetRepository;
+        return this;
+    }
+
+
+    public AdapterPresenter<M> setParam(HashMap<String, Object> param) {
+        this.param = param;
         return this;
     }
 
@@ -87,10 +97,24 @@ public class AdapterPresenter<M> {
         return Refreshing;
     }
 
+    public void delay(long time){
+        this.time = time;
+    }
+
     public void fetch() {
         Refreshing = true;
         KLog.json("fetch()");
         getData();
+//        if(time != 0){
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    getData();
+//                }
+//            },time);
+//        }else {
+//            getData();
+//        }
         //view.reSetEmpty();
     }
 
@@ -113,7 +137,7 @@ public class AdapterPresenter<M> {
                                 } else {
                                     Refreshing = false;
                                     KLog.json("getDbData()");
-                                    view.setDBData(r, begin);
+                                    view.setData(r, begin);
                                 }
                             },
                             err -> getNetData(),
@@ -134,14 +158,14 @@ public class AdapterPresenter<M> {
         if(mNetRepository != null && NetWorkUtil.isNetConnected(App.getContext()))
             mNetSubscription = mNetRepository
                     .getData(param)
-                    .subscribe(res -> view.setNetData(res, begin),
+                    .subscribe(res -> view.setData(res, begin),
                             err -> err.printStackTrace(),
                             ()-> {
                                 Refreshing = false;
                                 if(mNetSubscription != null && !mNetSubscription.isDisposed())
                                     mNetSubscription.dispose();
                             });
-        else view.setNetData(null,begin);
+        else view.setData(null,begin);
     }
 
     public void unsubscribe(){

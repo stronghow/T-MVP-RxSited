@@ -15,18 +15,11 @@ public class C {
 
     //==================intent============//
     public static final String TRANSLATE_VIEW = "share_img";
-    public static final String TYPE = "type";
-    public static final String HEAD_DATA = "data";
-    public static final String VH_CLASS = "vh";
-    public static final int IMAGE_REQUEST_CODE = 100;
 
 
     //==================API============//
-    public static final String _CREATED_AT = "-createdAt";
-    public static final String INCLUDE = "include";
-    public static final String CREATER = "creater";
-    public static final String UID = "uId";
     public static final String PAGE = "page";
+    public static final String KEY = "KEY";
 
     //==================Router============//
     public static final String OBJECT_ID = "objectId";
@@ -35,11 +28,10 @@ public class C {
     //==================SITED============//
     public static final String WEB = "web";
     public static final String MAIN = "main";
+    public static final String SEARCH = "search";
     public static final String TAG = "tag";
     public static final String BOOK1 = "book1";
     public static final String SECTION1 = "section1";
-
-    public static final String TAG_TYPE = "tag_type";
 
     public static final String SOURCE = "source";
 
@@ -49,13 +41,7 @@ public class C {
 
     public static final String REFURL = "refurl";
 
-    public static final String ISUPDATE = "isUpdate";
-
     public static final int NO_MORE = -1;
-
-    public static final String BEGIN = "begin";
-
-    public static final String SETIONS = "setions";
 
     public static final String GET_FAVICON = "http://g.soz.im/{url}/cdn.ico?defaulticon=wp";
 
@@ -73,6 +59,8 @@ public class C {
     public static int oldIndex;
 
     public static int newIndex;
+
+    public static boolean isReverse;
 
     public static final String BATTERY = "Battery"; //获取低昂量
 

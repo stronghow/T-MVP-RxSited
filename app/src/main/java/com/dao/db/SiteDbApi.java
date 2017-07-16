@@ -1,16 +1,9 @@
 package com.dao.db;
 
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
-
-import com.App;
 import com.C;
-import com.dao.engine.DdSource;
 import com.model.LookModel;
 import com.model.Sections;
-import com.model.SourceModel;
 import com.socks.library.KLog;
 
 import java.util.ArrayList;
@@ -21,9 +14,6 @@ import io.reactivex.Observable;
 import io.realm.Realm;
 import io.realm.RealmModel;
 import io.realm.RealmResults;
-import me.noear.db.DataReader;
-import me.noear.db.DbContext;
-import me.noear.utils.EncryptUtil;
 
 
 /**
@@ -64,7 +54,7 @@ public class SiteDbApi {
     public static void updateLastlook(Sections oldmodel,Sections newmodel){
         //设置book::sections记录
         //记录数据位置
-        SiteDbApi.setLastLook(newmodel.bookUrl,newmodel.url,newmodel.index);
+        SiteDbApi.setLastLook(newmodel.QueryKey,newmodel.url,newmodel.index);
         KLog.json("oldmodel = " + oldmodel.name + "newmodel = " + newmodel.name);
         oldmodel.isLook = false;
         newmodel.isLook = true;
@@ -78,7 +68,7 @@ public class SiteDbApi {
         //设置book::sections记录
         //记录数据位置
 
-        SiteDbApi.setLastLook(model.bookUrl,model.url,model.index);
+        SiteDbApi.setLastLook(model.QueryKey,model.url,model.index);
 
         Observable.fromIterable(sectionses)
                 .filter(sections -> sections.isLook||(sections.url != null && sections.index == model.index))
@@ -86,153 +76,5 @@ public class SiteDbApi {
                 .subscribe((data)->{
                     SiteDbApi.insertOrUpdate(data);
                 });
-    }
-
-
-    static class SiteDbContext extends DbContext {
-        public SiteDbContext(Context context) {
-            super(context, "sitedb", 10);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-
-            db.execSQL("create table sites (" +
-                    "id integer primary key autoincrement," +
-                    "type integer DEFAULT 0 NOT NULL," +
-                    "key varchar(40)," + //md5
-                    "url varchar(100)," +
-                    "expr varchar(200)," +
-                    "ver integer," +
-                    "title varchar(40)," +
-                    "author varchar(40)," +
-                    "intro varchar(40)," +
-                    "logo varchar(40)," +
-                    "sited text," +
-                    "cookies varchar(1000)," +
-                    "subTime long," + //订阅时间（为0时；未订阅）
-                    "logTime long);");
-
-            db.execSQL("CREATE INDEX IX_site_key ON sites (key);");
-
-
-            db.execSQL("create table historys (" +
-                    "id integer primary key autoincrement," +
-                    "key varchar(40)," +
-                    "title varchar(40)," +
-                    "url varchar(100)," +
-                    "logTime long);");
-
-            db.execSQL("CREATE INDEX IX_history_key ON historys (key);");
-        }
-
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        }
-    }
-
-    static SiteDbContext db;
-
-    //history
-    //
-    static
-    {
-        if(db == null){
-            db = new SiteDbContext(App.getContext());
-        }
-    }
-
-
-    public static void setSourceExpr(DdSource sd){
-        db.updateSQL("UPDATE  sites SET expr=? WHERE key=?;",
-                sd.expr, sd.url_md5);
-    }
-
-    public static void setSourceCookies(DdSource sd) {
-        db.updateSQL("UPDATE  sites SET cookies=? WHERE key=?;",
-                sd.cookies(), sd.url_md5);
-    }
-
-    public static String getSourceCookies(DdSource sd) {
-        SourceModel temp = getSourceByKey(sd.url_md5);
-        if (temp == null)
-            return null;
-        else
-            return temp.cookies;
-    }
-
-    public static List<SourceModel> getSources(boolean isOnlyAddin) {
-        List<SourceModel> list = new ArrayList<>();
-
-        DataReader dr = db.selectSQL("SELECT * FROM sites " + (isOnlyAddin ? "WHERE type<>99;" : ";"));
-
-        while (dr.read()) {
-            SourceModel m = new SourceModel();
-            m.id = dr.getInt("id");
-            m.type = dr.getInt("type");
-            m.key = dr.getString("key");
-            m.url = dr.getString("url");
-            m.expr = dr.getString("expr");
-            m.ver = dr.getInt("ver");
-            m.author = dr.getString("author");
-            m.title = dr.getString("title");
-            m.intro = dr.getString("intro");
-            m.logo = dr.getString("logo");
-            m.sited = dr.getString("sited");
-            m.cookies = dr.getString("cookies");
-            m.subTime = dr.getLong("subTime");
-            list.add(m);
-        }
-        dr.close();//内部同时关闭游标和数据库
-
-        for (SourceModel s : list) {
-            if (TextUtils.isEmpty(s.url)) {
-                s.url = s.key;
-                s.key = EncryptUtil.md5(s.url);
-                db.updateSQL("UPDATE sites SET key=?,url=? WHERE id=?", s.key, s.url, s.id);
-            }
-        }
-
-        return list;
-    }
-
-    public static SourceModel getSourceByUrl(String url)
-    {
-        List<SourceModel> list = getSources(true);
-
-//        for(SourceModel m :list){
-//            if(m.isMe(url))
-//                return m;
-//        }
-
-        return null;
-    }
-
-    public static SourceModel getSourceByKey(String key)
-    {
-        DataReader dr = db.selectSQL("SELECT * FROM sites WHERE key=?;",key);
-        SourceModel m = null;
-
-        if (dr.read()) {
-            m = new SourceModel();
-
-            m.id      = dr.getInt("id");
-            m.type    = dr.getInt("type");
-            m.key     = dr.getString("key");
-            m.url     = dr.getString("url");
-            m.ver     = dr.getInt("ver");
-            m.author  = dr.getString("author");
-            m.title   = dr.getString("title");
-            m.intro   = dr.getString("intro");
-            m.logo    = dr.getString("logo");
-            m.sited   = dr.getString("sited");
-            m.cookies = dr.getString("cookies");
-            m.subTime = dr.getLong("subTime");
-        }
-        dr.close();//内部同时关闭游标和数据库
-
-        return m;
     }
 }

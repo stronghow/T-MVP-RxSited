@@ -25,16 +25,8 @@ public class SpUtil {
     }
 
     public static void setNight(Context context, boolean isNight) {
-        prefs.edit().putBoolean("isNight", isNight).commit();
+        prefs.edit().putBoolean("isNight", isNight).apply();
         if (context instanceof BaseActivity)
             ((BaseActivity) context).reload();
     }
-
-//    public static void setLastLOOK(Context context, String url) {
-//        prefs.edit().putString("LastLOOK", url).commit();
-//    }
-//
-//    public static void getLastLOOK() {
-//        prefs.getString("LastLOOK","NULL");
-//    }
 }

@@ -23,7 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
+@SuppressWarnings("unchecked")
 public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IAdapterView {
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recyclerview;
@@ -33,7 +33,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     private CoreAdapter<M> mCommAdapter;
     private AdapterPresenter<M> mCoreAdapterPresenter;
     private HashMap mMap = new HashMap();
-    private boolean isHasHeadView = false, isHasFootView = false, isEmpty = false, isReverse = false,isRefreshable = false;
+    private boolean isHasHeadView = false, isHasFootView = false, isEmpty = false, isReverse = false,isRefreshable = false,neeHint = false;
     private int headType, footType, spanCount;
     private int lastVisibleItem,total;
     private SimpleDateFormat ft = new SimpleDateFormat("HH:mm");
@@ -42,6 +42,12 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     public TRecyclerView(Context context) {
         super(context);
         init(context, null);
+    }
+
+    public TRecyclerView(Context context,boolean needHint){
+        super(context);
+        this.neeHint = needHint;
+        init(context,null);
     }
 
     public TRecyclerView(Context context, AttributeSet attrs) {
@@ -54,11 +60,11 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         init(context, attrs);
     }
 
-    public AdapterPresenter getPresenter() {
+    public AdapterPresenter<M> getPresenter() {
         return mCoreAdapterPresenter;
     }
 
-    public CoreAdapter getCoreAdapter() {
+    public CoreAdapter<M> getCoreAdapter() {
         return mCommAdapter;
     }
 
@@ -68,9 +74,9 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         int itemType = ta.getResourceId(R.styleable.TRecyclerView_itemType, 0);
         footType = ta.getResourceId(R.styleable.TRecyclerView_footType, 0);
         isReverse = ta.getBoolean(R.styleable.TRecyclerView_isReverse, false);
+        if(!neeHint) neeHint = ta.getBoolean(R.styleable.TRecyclerView_needHint,false);
         isRefreshable = ta.getBoolean(R.styleable.TRecyclerView_isRefreshable, true);
         spanCount = ta.getInteger(R.styleable.TRecyclerView_spanCount,1);
-        KLog.json("spanCount="+spanCount);
         ta.recycle();
 
         View layout = inflate(context, R.layout.layout_list_recyclerview, this);
@@ -89,7 +95,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         mLayoutManager.setItemPrefetchEnabled(true); //预加载优化
         recyclerview.setLayoutManager(mLayoutManager);
         recyclerview.setItemAnimator(new DefaultItemAnimator());
-        mCommAdapter = new CoreAdapter<>();
+        mCommAdapter = new CoreAdapter<>(neeHint);
         recyclerview.setAdapter(mCommAdapter);
         recyclerview.addOnScrollListener(new RecyclerView.OnScrollListener() {
             RecyclerView.LayoutManager layoutManager;
@@ -162,6 +168,10 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         }
     }
 
+    public RecyclerView getRecyclerview(){
+        return recyclerview;
+    }
+
     public TRecyclerView<M> setSpanCount(int spanCount) {
         this.spanCount = spanCount;
         mLayoutManager.setSpanCount(spanCount);
@@ -204,7 +214,10 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     }
 
     public void reFetch() {
-        mCoreAdapterPresenter.setBegin(begin - 1);
+        mCommAdapter.isRefetch = true;
+        begin--;
+        if(begin > 0) begin = 0;
+        mCoreAdapterPresenter.setBegin(begin);
         swipeRefresh.setRefreshing(true);
         mCoreAdapterPresenter.fetch_Net();
     }
@@ -218,8 +231,8 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         }
     }
 
-    //@DbRealm
-    public void setNetData(List data, int begin) {
+    @Override
+    public void setData(List data, int begin) {
         this.begin = begin;
         swipeRefresh.setRefreshing(false);
         mCommAdapter.setBeans(data, begin);
@@ -231,21 +244,31 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
             recyclerview.scrollToPosition(mCommAdapter.getItemCount() - data.size() - 2);
     }
 
+//    //@DbRealm
+//    @Override
+//    public void setNetData(List data, int begin) {
+//        this.begin = begin;
+//        swipeRefresh.setRefreshing(false);
+//        mCommAdapter.setBeans(data, begin);
+//        if ((begin <= 1)&&(data == null || data.size() == 0)) {
+//            KLog.json("setEmpty");
+//            setEmpty();
+//        }
+//        else if (isReverse)
+//            recyclerview.scrollToPosition(mCommAdapter.getItemCount() - data.size() - 2);
+//    }
 
-    public void setDBData(List data) {
-        setDBData(data,-1);
-    }
 
-    @Override
-    public void setDBData(List data,int begin) {
-        this.begin = begin;
-        swipeRefresh.setRefreshing(false);
-        mCommAdapter.setBeans(data, begin);
-        if ((begin <= 1)&&(data == null || data.size() == 0))
-            setEmpty();
-        else if (isReverse)
-            recyclerview.scrollToPosition(mCommAdapter.getItemCount() - data.size() - 2);
-    }
+//    @Override
+//    public void setDBData(List data,int begin) {
+//        this.begin = begin;
+//        swipeRefresh.setRefreshing(false);
+//        mCommAdapter.setBeans(data, begin);
+//        if ((begin <= 1)&&(data == null || data.size() == 0))
+//            setEmpty();
+//        else if (isReverse)
+//            recyclerview.scrollToPosition(mCommAdapter.getItemCount() - data.size() - 2);
+//    }
 
     @Override
     public void reSetEmpty() {
@@ -270,12 +293,13 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         //然后区分情况
         if (n <= firstItem ){
             //当要置顶的项在当前显示的第一个项的前面时
+            //smoothScrollBy 相对于上一次位置的滚动 负数向下 正数向上
             recyclerview.scrollToPosition(n);
             recyclerview.scrollBy(0,-(int)((lastItemY-firstItemY)/2));
         }else if ( n <= lastItem ){
             //当要置顶的项已经在屏幕上显示时
             int top = recyclerview.getChildAt(n - firstItem).getTop();
-            recyclerview.smoothScrollBy(0,top-((int)((lastItemY-firstItemY)/2)));//相对于上一次位置的滚动 负数向下 正数向上
+            recyclerview.smoothScrollBy(0,top-((int)((lastItemY-firstItemY)/2)));
         }else{
             //当要置顶的项在当前显示的最后一项的后面时
             recyclerview.scrollToPosition(n);
@@ -287,7 +311,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         return this.mTextView;
     }
 
-    public int getLastVisibleItem(){
+    private int getLastVisibleItem(){
         return this.lastVisibleItem;
     }
 

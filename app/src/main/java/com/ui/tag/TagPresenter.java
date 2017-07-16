@@ -2,14 +2,13 @@ package com.ui.tag;
 
 import com.DbFactory;
 import com.EventTags;
-import com.SitedFactory;
+import com.NetFactory;
 import com.app.annotation.apt.InstanceFactory;
 import com.app.annotation.javassist.Bus;
 import com.app.annotation.javassist.BusRegister;
 import com.app.annotation.javassist.BusUnRegister;
 import com.base.DataPresenter;
 import com.model.Tags;
-import com.socks.library.KLog;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,23 +26,21 @@ public class TagPresenter extends TagContract.Presenter {
     @Override
     public void getTabList(HashMap<String,Object> map) {
 
-                DataPresenter.getInstance(Tags.class)
+                DataPresenter.<Tags>getInstance()
                 .setParam(map)
                 .setDbRepository(DbFactory::getTags)
-                .setNetRepository(SitedFactory::getTags)
+                .setNetRepository(NetFactory::getTags)
                 .fetch()
                 .subscribe(tagses ->  showTabList(tagses));
     }
 
     @Bus(EventTags.SHOW_TAB_LIST)
     public void showTabList(List<Tags> tabs) {
-        KLog.json("进入showTabList");
         mView.showTabList(tabs);
     }
 
     @BusRegister
     private void initEvent() {
-        KLog.json("进入initEvent");
     }
 
 

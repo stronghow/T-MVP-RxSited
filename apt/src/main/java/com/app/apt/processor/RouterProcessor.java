@@ -65,6 +65,7 @@ public class RouterProcessor implements IProcessor {
         blockBuilderGo.addStatement("mCurActivityExtra=extra");
         blockBuilderGo.addStatement("Activity mContext=$T.getAppContext().getCurActivity()", appClassName);
         blockBuilderGo.beginControlFlow(" switch (name)");//括号开始
+        blockBuilderBind.addStatement("if(mCurActivityExtra==null) return");
         blockBuilderBind.beginControlFlow(" switch (mContext.getClass().getSimpleName())");//括号开始
 
         List<RouterActivityModel> mRouterActivityModels = new ArrayList<>();

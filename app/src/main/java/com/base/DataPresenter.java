@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
 import io.realm.RealmObject;
 
 /**
@@ -31,7 +31,7 @@ public class DataPresenter<T extends RealmObject> {
 
     private DataPresenter(){}
 
-    public  static <T extends RealmObject> DataPresenter<T> getInstance(Class<T> type){
+    public  static <T extends RealmObject> DataPresenter<T> getInstance(){
         return new DataPresenter<>();
     }
 
@@ -64,12 +64,12 @@ public class DataPresenter<T extends RealmObject> {
 //        return this;
 //    }
 
-    public Observable<List<T>> fetch() {
+    public Flowable<List<T>> fetch() {
         return getDataT();
     }
 
 
-    private Observable<List<T>> getNetDataT(){
+    private Flowable<List<T>> getNetDataT(){
         KLog.json("fromNet");
         if(NetWorkUtil.isNetConnected(App.getContext()) && mNetRepository != null)
             return mNetRepository.getData(param)
@@ -80,14 +80,14 @@ public class DataPresenter<T extends RealmObject> {
         }
     }
 
-    private Observable<List<T>> getDataT(){
+    private Flowable<List<T>> getDataT(){
         if(mDbRepository != null)
             return mDbRepository
                     .getData(param)
                     .flatMap(ts -> {
                         if (ts != null && ts.size() > 0) {
                             KLog.json("fromDb");
-                            return Observable.just(ts).compose(RxSchedulers.io_main());
+                            return Flowable.just(ts).compose(RxSchedulers.io_main());
                         }
 
                         else
@@ -104,7 +104,7 @@ public class DataPresenter<T extends RealmObject> {
 //            mDbSubscription.dispose();
 //    }
 
-    private Observable<List<T>> Observable_NULL(){
-        return Observable.just(new ArrayList<T>(0)).compose(RxSchedulers.io_main());
+    private Flowable<List<T>> Observable_NULL(){
+        return Flowable.just(new ArrayList<T>(0)).compose(RxSchedulers.io_main());
     }
 }
