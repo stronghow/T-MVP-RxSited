@@ -9,8 +9,7 @@ import java.util.List;
  * Created by baixiaokang on 16/4/23.
  */
 public class C {
-    //==================API============//
-    public static final int FLAG_MULTI_VH = 0x000001;
+
 
 
     //==================intent============//

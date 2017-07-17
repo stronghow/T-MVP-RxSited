@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.C;
 import com.socks.library.KLog;
 import com.ui.main.BR;
 import com.ui.main.R;
@@ -19,6 +18,7 @@ import java.util.List;
  */
 @SuppressWarnings("unchecked")
 public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
+    private static final int FLAG_MULTI_VH = 0x000001;
     private final boolean needHint;
     private TypeSelector<M> mTypeSelector;
     private List<M> mItemList = new ArrayList<>();
@@ -47,6 +47,7 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
     @Override
     public void onBindViewHolder(BaseViewHolder holder, int position) {
         Object item = getItem(position);
+
         if (needHint && holder.itemView.getTag() == null) {
             holder.itemView.setTag(item);
             holder.itemView.postDelayed(() -> {
@@ -77,7 +78,7 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
 
     public void setTypeSelector(TypeSelector mTypeSelector) {
         this.mTypeSelector = mTypeSelector;
-        this.viewType = C.FLAG_MULTI_VH;
+        this.viewType = FLAG_MULTI_VH;
     }
 
     public void addHeadViewType(@LayoutRes int i, Object data) {
@@ -111,7 +112,7 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
         } else if (position >= (mHeadTypeDatas.size() + mItemList.size())) {
             return mFootTypeDatas.get(position - (mHeadTypeDatas.size() + mItemList.size())).type;
         } else {
-            return viewType == C.FLAG_MULTI_VH ?
+            return viewType == FLAG_MULTI_VH ?
                     mTypeSelector.getType((M) getItem(position)) :
                     viewType;
         }

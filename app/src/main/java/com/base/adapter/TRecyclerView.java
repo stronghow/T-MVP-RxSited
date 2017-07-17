@@ -106,11 +106,13 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
                 KLog.json("getBegin()="+mCoreAdapterPresenter.getBegin());
                 if (recyclerview.getAdapter() != null
                         && newState == RecyclerView.SCROLL_STATE_IDLE
-                        && lastVisibleItem + 1 == recyclerview.getAdapter()
-                        .getItemCount() && mCommAdapter.isHasMore
+                        && lastVisibleItem + 1 == recyclerview.getAdapter().getItemCount()
+                        && mCommAdapter.isHasMore
                         && !mCoreAdapterPresenter.isRefreshing()
-                        && mCoreAdapterPresenter.getBegin() > 0 )
+                        && mCoreAdapterPresenter.getBegin() > 0 ) {
+                    KLog.json("onScrollStateChanged::fetch");
                     mCoreAdapterPresenter.fetch();
+                }
             }
 
             @Override

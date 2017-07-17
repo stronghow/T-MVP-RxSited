@@ -31,8 +31,6 @@ public class AdapterPresenter<M> {
     private Disposable mDbSubscription;
     private Disposable mNetSubscription;
 
-    private long time = 0; //延时
-
     interface IAdapterView<M> {
         void setEmpty();
 
@@ -97,25 +95,10 @@ public class AdapterPresenter<M> {
         return Refreshing;
     }
 
-    public void delay(long time){
-        this.time = time;
-    }
-
     public void fetch() {
         Refreshing = true;
         KLog.json("fetch()");
         getData();
-//        if(time != 0){
-//            new Handler().postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    getData();
-//                }
-//            },time);
-//        }else {
-//            getData();
-//        }
-        //view.reSetEmpty();
     }
 
     public void fetch_Net(){
@@ -141,7 +124,9 @@ public class AdapterPresenter<M> {
                                 }
                             },
                             err -> getNetData(),
-                            ()-> { if(mDbSubscription != null && !mDbSubscription.isDisposed())
+                            ()-> {
+                                Refreshing = false;
+                                if(mDbSubscription != null && !mDbSubscription.isDisposed())
                                 mDbSubscription.dispose();
                             });
         }
@@ -152,6 +137,7 @@ public class AdapterPresenter<M> {
     }
 
     private void getNetData() {
+        Refreshing = true;
         begin++;
         param.put(C.PAGE, begin);
         KLog.json("getNetData");
@@ -159,7 +145,7 @@ public class AdapterPresenter<M> {
             mNetSubscription = mNetRepository
                     .getData(param)
                     .subscribe(res -> view.setData(res, begin),
-                            err -> err.printStackTrace(),
+                            err -> { Refreshing = false;err.printStackTrace();},
                             ()-> {
                                 Refreshing = false;
                                 if(mNetSubscription != null && !mNetSubscription.isDisposed())

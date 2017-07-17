@@ -5,6 +5,7 @@ import android.accounts.NetworkErrorException;
 import com.App;
 import com.socks.library.KLog;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -31,6 +34,11 @@ public class HttpUtil {
             return "";
         }
     }
+
+    public static Observable<String> RxgetHtml(final RxNode cfg, final String url)  {
+            return loadHtml(new HttpMessage(cfg, url));
+    }
+
 
     public static String getHtml(String url){
         try {
@@ -56,14 +64,32 @@ public class HttpUtil {
                 } else {
                     builder.get();
                 }
+                Request request = builder.build();
+                App.getHttpClient().newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
 
-                try {
-                    String html = getResponseBody(App.getHttpClient(), builder.build(), msg.getEncode());
-                    s.onNext(html);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                s.onComplete();
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        if (response.isSuccessful()) {
+                            KLog.json("HttpUtil-RequestHeader", request.headers().toString());
+                            KLog.json("HttpUtil-ResponseHeader", response.headers().toString());
+                            s.onNext(new String(response.body().bytes(), msg.getEncode()));
+                            s.onComplete();
+                            response.close();
+                        }else{
+                            s.onNext("[]");
+                            s.onComplete();
+                            response.close();
+                        }
+                    }
+                });
+//                String html = getResponseBody(App.getHttpClient(), builder.build(), msg.getEncode());
+//                s.onNext(html);
+//
+//                s.onComplete();
             }
         }).subscribeOn(Schedulers.io());
     }
@@ -105,7 +131,7 @@ public class HttpUtil {
     }
 
     @SuppressWarnings("all")
-    private static String getResponseBody(OkHttpClient client, Request request, String encode) throws NetworkErrorException {
+    private static String getResponseBody(OkHttpClient client, Request request, String encode) {
         Response response = null;
         try {
             response = client.newCall(request).execute();
@@ -121,7 +147,7 @@ public class HttpUtil {
                 response.close();
             }
         }
-        throw new NetworkErrorException();
+        return "[]";
     }
 
     public static String getResponseBody(OkHttpClient client, Request request) throws NetworkErrorException {
