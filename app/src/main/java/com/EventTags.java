@@ -15,5 +15,5 @@ public interface EventTags {
      * sited
      */
 
-    int SHOW_TAG_LIST = 0x00005;
+    int CURRENT_ITEM = 0x00005;
 }

@@ -10,10 +10,8 @@ import com.C;
 import com.DbFactory;
 import com.RxRouter;
 import com.app.annotation.apt.InstanceFactory;
-import com.apt.TRouter;
 import com.base.adapter.AdapterPresenter;
 import com.base.util.ToastUtil;
-import com.dao.db.SiteDbApi;
 import com.model.SourceModel;
 import com.sited.RxSource;
 import com.sited.RxSourceApi;
@@ -78,29 +76,17 @@ public class MainPresenter extends MainContract.Presenter {
             String sited = FileUtil.toString(cr.openInputStream(url));
             RxSource sd = RxSourceApi.getRxSource(cr.openInputStream(url));
             if (sd != null) {
-                SourceModel sourceModel = new SourceModel();
-                sourceModel.title = sd.title;
-                sourceModel.url = sd.url;
-                sourceModel.sited = sited;
-                //sourceModel.cookies = sd.cookies();
-                SiteDbApi.insertOrUpdate(sourceModel);
-                //sd.sited = null;
-
-                ToastUtil.show("插件已成功安装");
-
-                HashMap map = new HashMap();
-                map.put(C.URL,null);
-                map.put(C.SOURCE,sd);
-                TRouter.go(C.TAG,map);
-                return true;
+                if(RxRouter.goTag(sd,sited)) {
+                    ToastUtil.show("插件已成功安装");
+                    return true;
+                }else {
+                    return false;
+                }
             } else {
                 ToastUtil.show("插件格式有问题");
                 return false;
             }
         } catch (Exception ex) {
-            for(StackTraceElement element : ex.getStackTrace()){
-                KLog.json(element.toString());
-            }
             ex.printStackTrace();
             KLog.file("RxSited",App.getAppContext().getExternalFilesDir(null),"RxSited_log.txt",ex.getMessage());
             ToastUtil.show("出错：" + ex.getMessage());

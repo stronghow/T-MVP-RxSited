@@ -21,6 +21,7 @@ public class AdapterPresenter<M> {
 //    public static final int LOAD_DEFAULT = 1; //（默认）根据cache-control决定是否从网络上取数据。
 //    public static final int LOAD_NO_CACHE = 2;  //不使用缓存，只从网络获取数据.
 //    public static final int LOAD_CACHE_ELSE_NETWORK = 3; //只要本地有，无论是否过期，或者no-cache，都使用缓存中的数据。
+    public static final int NO_MORE = -2;
     private NetRepository<M> mNetRepository;//仓库
     private HashMap<String, Object> param = new HashMap<>();//设置远程网络仓库钥匙
     private DbRepository<M> mDbRepository;
@@ -69,6 +70,11 @@ public class AdapterPresenter<M> {
 
     public AdapterPresenter<M> setDbRepository(DbRepository<M> mDbRepository) {
         this.mDbRepository = mDbRepository;
+        return this;
+    }
+
+    public AdapterPresenter<M> setNo_MORE(boolean isNo_MORE) {
+        if(isNo_MORE) this.begin = NO_MORE;
         return this;
     }
 

@@ -1,8 +1,12 @@
 package com.ui.tag;
 
+import android.view.MenuItem;
+
 import com.C;
+import com.EventTags;
 import com.app.annotation.apt.Extra;
 import com.app.annotation.apt.Router;
+import com.app.annotation.javassist.Bus;
 import com.base.BaseActivity;
 import com.base.util.helper.FragmentAdapter;
 import com.base.util.helper.PagerChangeListener;
@@ -37,6 +41,18 @@ public class TagActivity extends BaseActivity<TagPresenter,ActivitySitedTagBindi
     }
 
     @Override
+    public int getMenuId() {
+        return R.menu.menu_tag;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_tab)
+            TabDialog.getInstance(url).start(getSupportFragmentManager());
+            return true;
+    }
+
+    @Override
     public void initView() {
         setTitle(source.title);
         HashMap map = new HashMap();
@@ -57,6 +73,11 @@ public class TagActivity extends BaseActivity<TagPresenter,ActivitySitedTagBindi
         PagerChangeListener mPagerChangeListener = PagerChangeListener.newInstance(mViewBinding.collapsingToolbar,mViewBinding.toolbarIvTarget,mViewBinding.toolbarIvOutgoing,new String[mTabs.size()]);
         mViewBinding.viewpager.addOnPageChangeListener(mPagerChangeListener);
         mViewBinding.tabs.setupWithViewPager(mViewBinding.viewpager);
+    }
+
+    @Bus(EventTags.CURRENT_ITEM)
+    public void setCurrentItem(int item){
+        mViewBinding.viewpager.setCurrentItem(item,true);
     }
 
 

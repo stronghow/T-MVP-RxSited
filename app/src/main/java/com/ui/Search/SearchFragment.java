@@ -67,13 +67,12 @@ public class SearchFragment extends Fragment {
         tRecyclerView.getCoreAdapter().setOnItemClickListener(new BaseViewHolder.ItemClickListener() {
             @Override
             public void onItemClick(View view, int postion) {
-                View view1 = View.inflate(getContext(),R.layout.sited_tag_item ,null);
                 Tag item = (Tag) tRecyclerView.getCoreAdapter().getItem(postion);
                 RouterHelper.go(C.BOOK1, DataExtra.create()
                                 .add(C.MODEL,item)
                                 .add(C.SOURCE,rxSource)
                                 .build(),
-                        view1.findViewById(R.id.image));
+                        view.findViewById(R.id.image));
             }
         });
         tRecyclerView.getPresenter()

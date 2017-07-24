@@ -1,6 +1,5 @@
 package com.sited;
 
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.ui.main.R;
@@ -12,23 +11,14 @@ import java.util.List;
  */
 
 public class RxJscript {
+    private static final String cheerio = Utils.getFileString(R.raw.cheerio);
 
-    private final List<Lib> require;
-    private final String code;
-
-    public RxJscript(@Nullable String code, List<Lib> require){
-        this.code = code;
-        this.require = require;
-    }
-
-    public boolean load(JsEngine js){
+    public static boolean load(JsEngine js, String code, List<Lib> require){
         js.loadJs(code); //fun
         if(require != null && require.size()>0) {  //lib
             for (Lib lib : require) {
                 if (!loadLib(js, lib.lib))
                    js.loadJs(HttpUtil.getHtml(lib.url));
-//                    RxHttp.get(lib.url)
-//                            .subscribe(s -> js.loadJs(s));
             }
         }else{
             loadLib(js,"cheerio");
@@ -36,7 +26,7 @@ public class RxJscript {
         return true;
     }
 
-    private boolean loadLib(JsEngine js,String lib){
+    private static boolean loadLib(JsEngine js,String lib){
         if(TextUtils.isEmpty(lib)) return false;
         try {
             switch (lib) {
@@ -50,7 +40,9 @@ public class RxJscript {
                     js.loadJs(Utils.getFileString(R.raw.base64));
                     break;
                 case "cheerio":
-                    js.loadJs(Utils.getFileString(R.raw.cheerio));
+                    if(cheerio == null)
+                        js.loadJs(Utils.getFileString(R.raw.cheerio));
+                    else js.loadJs(cheerio);
                     break;
                 default:
                     return false;

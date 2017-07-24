@@ -3,7 +3,7 @@ package com.ui.main;
 import android.view.View;
 
 import com.RxRouter;
-import com.base.DataBindingDialog;
+import com.base.DataBindingBottomSheetDialog;
 import com.ui.main.databinding.BottomBinding;
 
 import static com.ui.main.R.id.Sited_1;
@@ -14,7 +14,7 @@ import static com.ui.main.R.id.Sited_3;
  * Created by haozhong on 2017/4/29.
  */
 
-public class TMVPFragment extends DataBindingDialog<BottomBinding> implements View.OnClickListener {
+public class TMVPFragment extends DataBindingBottomSheetDialog<BottomBinding> implements View.OnClickListener {
    private static TMVPFragment mDialog;
 
     @Override
@@ -35,7 +35,7 @@ public class TMVPFragment extends DataBindingDialog<BottomBinding> implements Vi
     }
 
 
-    public static DataBindingDialog getInstance() {
+    public static DataBindingBottomSheetDialog getInstance() {
         if(mDialog == null){
             mDialog = new TMVPFragment();
         }

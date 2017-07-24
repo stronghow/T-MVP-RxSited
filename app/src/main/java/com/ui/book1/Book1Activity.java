@@ -51,7 +51,6 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
 
     @Override
     public void initView() {
-        KLog.json("Book1::initView");
         BindingUtils.loadImg(mViewBinding.image, model.logo,model.url);
         BindingUtils.blur_loadImg(mViewBinding.blurimage,model.logo,model.url);
         setTitle(model.name);

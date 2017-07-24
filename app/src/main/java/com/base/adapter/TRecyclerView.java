@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 @SuppressWarnings("unchecked")
 public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IAdapterView {
     private SwipeRefreshLayout swipeRefresh;
@@ -34,10 +36,12 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     private AdapterPresenter<M> mCoreAdapterPresenter;
     private HashMap mMap = new HashMap();
     private boolean isHasHeadView = false, isHasFootView = false, isEmpty = false, isReverse = false,isRefreshable = false,neeHint = false;
-    private int headType, footType, spanCount;
+    private int headType, footType, itemType=0, spanCount;
     private int lastVisibleItem,total;
     private SimpleDateFormat ft = new SimpleDateFormat("HH:mm");
     private int begin;
+    private Map<Integer,Integer> Type_SpanCount = new HashMap<>();
+    private int MaxSpanCout = 1;
 
     public TRecyclerView(Context context) {
         super(context);
@@ -71,7 +75,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     public void init(Context context, AttributeSet attrs) {
         TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.TRecyclerView);
         headType = ta.getResourceId(R.styleable.TRecyclerView_headType, 0);
-        int itemType = ta.getResourceId(R.styleable.TRecyclerView_itemType, 0);
+        itemType = ta.getResourceId(R.styleable.TRecyclerView_itemType, 0);
         footType = ta.getResourceId(R.styleable.TRecyclerView_footType, 0);
         isReverse = ta.getBoolean(R.styleable.TRecyclerView_isReverse, false);
         if(!neeHint) neeHint = ta.getBoolean(R.styleable.TRecyclerView_needHint,false);
@@ -97,6 +101,8 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         recyclerview.setItemAnimator(new DefaultItemAnimator());
         mCommAdapter = new CoreAdapter<>(neeHint);
         recyclerview.setAdapter(mCommAdapter);
+        if (itemType != 0) setViewType(itemType);
+
         recyclerview.addOnScrollListener(new RecyclerView.OnScrollListener() {
             RecyclerView.LayoutManager layoutManager;
 
@@ -136,6 +142,8 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
             }
         });
 
+//        mLayoutManager.setSpanCount(MaxSpanCout);
+//        recyclerview.setLayoutManager(mLayoutManager);
 
         RecyclerView.LayoutManager layoutManager = recyclerview.getLayoutManager();
         if (layoutManager instanceof GridLayoutManager) {
@@ -143,11 +151,20 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
                 @Override
                 public int getSpanSize(int position) {
                     int itemViewType = recyclerview.getAdapter().getItemViewType(position);
+                    int getSpan;
+
+                    //只适合两种type的情况
+                    // TODO: 2017/7/24 后期增加多种type的支持 
                     if (itemViewType == R.layout.list_footer_view) {
-                        return spanCount;
+                        getSpan = MaxSpanCout > spanCount ? MaxSpanCout : spanCount;
                     } else {
-                        return 1;
+                        if(Type_SpanCount.size() > 0){
+                            getSpan =  MaxSpanCout / Type_SpanCount.get(itemViewType);
+                        }
+                        else getSpan = 1;
                     }
+                    KLog.json("position = " + position + " getSpan = " + getSpan +" itemViewType = " + itemViewType + " Type = " + R.layout.list_footer_view);
+                    return  getSpan;
                 }
             });
         } else if (layoutManager instanceof StaggeredGridLayoutManager) {
@@ -161,7 +178,6 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
             reFetch();
         }));
 
-        if (itemType != 0) setViewType(itemType);
         swipeRefresh.setEnabled(isRefreshable);
         if (isReverse) {
             mLayoutManager.setStackFromEnd(true);//列表再底部开始展示，反转后由上面开始展示
@@ -186,8 +202,17 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         return this;
     }
 
-    public TRecyclerView<M> setTypeSelector(TypeSelector mTypeSelector) {
+    public TRecyclerView<M> setTypeSelector(TypeSelector<M> mTypeSelector) {
         this.mCommAdapter.setTypeSelector(mTypeSelector);
+        return this;
+    }
+
+    public TRecyclerView<M> setType_SpanCount(@LayoutRes int type,int spanCount) {
+        if(spanCount > MaxSpanCout){
+            MaxSpanCout = spanCount;
+            mLayoutManager.setSpanCount(MaxSpanCout);
+        }
+        this.Type_SpanCount.put(type,spanCount);
         return this;
     }
 

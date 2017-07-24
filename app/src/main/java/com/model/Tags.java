@@ -18,7 +18,7 @@ public class Tags extends RealmObject implements ItemTitle{
     @PrimaryKey
     public String url;
 
-    public boolean isSearch;
+    public String group;
 
     @Index
     @QueryKey

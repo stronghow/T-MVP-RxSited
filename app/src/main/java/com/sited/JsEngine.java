@@ -56,6 +56,7 @@ public class JsEngine {
      * @return
      */
     public Flowable<String> callJs(String fun, String... args){
+
         return Flowable.create(new FlowableOnSubscribe<String>(){
             @Override
             public void subscribe(@NonNull FlowableEmitter<String> e) throws Exception {

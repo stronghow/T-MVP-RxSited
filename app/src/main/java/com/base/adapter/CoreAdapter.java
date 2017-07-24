@@ -76,7 +76,7 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
         this.viewType = type;
     }
 
-    public void setTypeSelector(TypeSelector mTypeSelector) {
+    public void setTypeSelector(TypeSelector<M> mTypeSelector) {
         this.mTypeSelector = mTypeSelector;
         this.viewType = FLAG_MULTI_VH;
     }
@@ -112,8 +112,9 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
         } else if (position >= (mHeadTypeDatas.size() + mItemList.size())) {
             return mFootTypeDatas.get(position - (mHeadTypeDatas.size() + mItemList.size())).type;
         } else {
+//            if(viewType == FLAG_MULTI_VH) KLog.json("itemViewType = 进入mList");
             return viewType == FLAG_MULTI_VH ?
-                    mTypeSelector.getType((M) getItem(position)) :
+                    mTypeSelector.<M>getType((M)getItem(position - mHeadTypeDatas.size())) :
                     viewType;
         }
     }

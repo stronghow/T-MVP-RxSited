@@ -62,18 +62,18 @@
 
                 </android.support.percent.PercentFrameLayout>
 
-                <android.support.v7.widget.AppCompatImageView
-                    android:id="@+id/setting"
-                    android:layout_width="33dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top|end"
-                    android:layout_marginRight="10dp"
-                    android:contentDescription="@null"
-                    android:paddingBottom="5dp"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:paddingTop="35dp"
-                    app:srcCompat="@mipmap/ic_search"/>
+                <!--<android.support.v7.widget.AppCompatImageView-->
+                    <!--android:id="@+id/setting"-->
+                    <!--android:layout_width="33dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_gravity="top|end"-->
+                    <!--android:layout_marginRight="10dp"-->
+                    <!--android:contentDescription="@null"-->
+                    <!--android:paddingBottom="5dp"-->
+                    <!--android:paddingLeft="5dp"-->
+                    <!--android:paddingRight="5dp"-->
+                    <!--android:paddingTop="35dp"-->
+                    <!--app:srcCompat="@mipmap/ic_search"/>-->
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"

@@ -22,8 +22,11 @@ import io.reactivex.Observable;
 
 @Router(C.SEARCH)
 public class SearchActivity extends BaseActivity<SearchPresenter,ActivitySitedSearchBinding> implements SearchContrat.View{
+
     private List<SearchFragment> fragments;
     private String key;
+
+
     @Override
     public int getLayoutId() {
         return R.layout.activity_sited_search;

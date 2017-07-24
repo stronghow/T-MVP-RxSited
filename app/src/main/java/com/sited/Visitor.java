@@ -57,6 +57,16 @@ public class Visitor extends VisitorSupport {
                         source.search.attrs.set(attribute.getName(),attribute.getValue());
                     source.search.build(source);
                     break;
+                case "hots":
+                    source.hots = new RxNode();
+                    for(Attribute attribute : node.attributes())
+                        source.hots.attrs.set(attribute.getName(),attribute.getValue());
+                    source.hots.build(source);
+                case "updatese":
+                    source.updatese = new RxNode();
+                    for(Attribute attribute : node.attributes())
+                        source.updatese.attrs.set(attribute.getName(),attribute.getValue());
+                    source.updatese.build(source);
                 case "tags":
                       source.tags = new RxNode();
                       Element tags = node;

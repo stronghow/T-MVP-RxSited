@@ -3,6 +3,7 @@
     <string name="app_name">RxSited</string>
     <string name="menu_settings">用户</string>
     <string name="menu_search">Search</string>
+    <string name="menu_tab">分类</string>
 
     <string name="drawer_open">drawer_open</string>
     <string name="drawer_close">drawer_close</string>

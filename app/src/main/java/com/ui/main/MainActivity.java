@@ -16,11 +16,17 @@ import com.base.BaseActivity;
 import com.base.adapter.BaseViewHolder;
 import com.base.entity.DataExtra;
 import com.base.util.SpUtil;
+import com.base.util.ToastUtil;
 import com.base.util.helper.RouterHelper;
 import com.model.SourceModel;
 import com.sited.RxSource;
 import com.sited.RxSourceApi;
 import com.ui.main.databinding.ActivityMainBinding;
+
+import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by haozhong on 2017/4/5.
@@ -61,9 +67,26 @@ public class MainActivity extends BaseActivity<MainPresenter,ActivityMainBinding
                 RxSource rxSource;
                 rxSource = RxSource.get(item.url);
                 if(rxSource == null) rxSource = RxSourceApi.getRxSource(item.sited);
+                if(rxSource.tags == null) {
+                    ToastUtil.show("对不起,暂时不支持无Tags节点的插件:)");
+                    return;
+                }
                 RouterHelper.go(C.TAG, DataExtra.create()
                         .add(C.SOURCE, rxSource)
                         .add(C.URL,item.url).build());
+            }
+        }).setOnItemLongClickListener(new BaseViewHolder.ItemLongClickListener() {
+            @Override
+            public void onItemLongClick(View view, int postion) {
+                List<SourceModel> _sourceModels = mViewBinding.listItem.getCoreAdapter().getItemList();
+                SourceModel model = _sourceModels.get(postion);
+                RealmResults<SourceModel> sourceModels = Realm.getDefaultInstance().where(SourceModel.class).equalTo("url",model.url).findAll();
+                Realm.getDefaultInstance().beginTransaction();
+                sourceModels.deleteFromRealm(0);
+                Realm.getDefaultInstance().commitTransaction();
+                _sourceModels.remove(postion);
+                mViewBinding.listItem.getCoreAdapter().notifyItemRemoved(postion);
+                ToastUtil.show(model.title + "插件已删除");
             }
         });
     }

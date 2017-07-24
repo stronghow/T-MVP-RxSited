@@ -15,7 +15,7 @@ import android.view.WindowManager;
  * Created by haozhong on 2017/4/30.
  */
 
-public abstract   class DataBindingDialog<B extends ViewDataBinding> extends BottomSheetDialogFragment {
+public abstract  class DataBindingBottomSheetDialog<B extends ViewDataBinding> extends BottomSheetDialogFragment {
     private BottomSheetBehavior mBehavior;
     protected B mViewDataBinding;
 
@@ -38,7 +38,7 @@ public abstract   class DataBindingDialog<B extends ViewDataBinding> extends Bot
         mBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
-    public void start(FragmentManager fm){
+    public  void  start(FragmentManager fm){
         show(fm,"");
     }
 
