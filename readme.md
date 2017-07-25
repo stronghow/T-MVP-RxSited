@@ -29,7 +29,7 @@ T-MVP 和 SiteD 的练手项目
 ## 效果图
 
 
-![gif](./images/1500947194-videorecord-2017-7-25-9-46-34.gif)
+![gif](./app.gif)
 
 
 2017 Stronghow
