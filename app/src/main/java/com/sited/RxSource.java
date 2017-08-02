@@ -37,7 +37,7 @@ public class RxSource {
     public String code;
 
     public RxNode hots;
-    public RxNode updatese;
+    public RxNode updates;
     public RxNode tags;
     public RxNode search;
     public RxNode tag;
@@ -133,12 +133,24 @@ public class RxSource {
         return jsEngine.callJs(cfg.parse, url, html);
     }
 
+    public Flowable<String> parseHots(String url){
+        String ul = getUrl(hots,url);
+        return doGetNodeViewModel(hots,ul);
+    }
+
+    public Flowable<String> parseUpdates(String url){
+        String ul = getUrl(updates,url);
+        return doGetNodeViewModel(updates,ul);
+    }
+
     public Flowable<String> parseSearch(String url,String key){
         String ul = getUrl(search,url,key);
         return doGetNodeViewModel(search,ul);
     }
 
     public Flowable<String> parseTags(String url){
+        parseHots(url).subscribe(KLog::json);
+        parseUpdates(url).subscribe(KLog::json);
         if(tags == null) return Flowable.just("[]");
         else if(tags.staticData != null)
             return Flowable.just(tags.staticData); // .mergeWith(doGetNodeViewModel(tags,url))
@@ -186,7 +198,7 @@ public class RxSource {
                     String[] urls = parseUrl.split(";");
                     KLog.json(" urls.length = " + urls.length);
                     for (String u1 : urls) {
-                        Thread.sleep(100);
+                        Thread.sleep(200);
                         e.onNext(HttpUtil.getHtml(cfg,u1));
                     }
                 } else {

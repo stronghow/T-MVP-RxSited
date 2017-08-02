@@ -93,11 +93,11 @@ public class NetFactory {
 
     public static Flowable<List<PicModel>> getSection(HashMap<String, Object> param){
         Sections sections = (Sections) param.get(C.MODEL);
-        RxSource rxSource = (RxSource)param.get(C.SOURCE);
-        int index = sections.index;
+        final RxSource rxSource = (RxSource)param.get(C.SOURCE);
+        final int index = sections.index;
         int page = (int)param.get(C.PAGE) -1;
-        if(index + page == C.sSectionses.size()) { //已经到最底部或者source为空
-            KLog.json("已经到最底部或者source为空");
+        if(index + page == C.sSectionses.size()) { //已经到最底
+            KLog.json("已经到最底部");
             return Observable_NULL();
         }
 
@@ -105,7 +105,7 @@ public class NetFactory {
         while (TextUtils.isEmpty(sections.url)){ //跳过分组标题
             page++;
             if(index + page == C.sSectionses.size()) { //已经到最底部
-                KLog.json("已经到最底部或者source为空");
+                KLog.json("已经到最底部");
                 return Observable_NULL();
             }
             sections = C.sSectionses.get(index + page);
@@ -114,40 +114,20 @@ public class NetFactory {
         final String key = sections.url;
         return rxSource.parseSection(sections.url)
                 .map(s -> {
+                    KLog.json(s);
                     List<PicModel> picModels = new ArrayList<>();
-                    if(rxSource.engine <= 25){
-                            JsonElement element = new JsonParser().parse(s);
-                            for (JsonElement el : element.getAsJsonArray()) {
-                                PicModel picModel = new PicModel();
-                                picModel.url = el.getAsString();
-                                picModel.QueryKey = key;
-                                picModels.add(picModel);
-                            }
-                    }else{
-                        picModels = DataFactory.JsonToList(s,PicModel.class);
-                    }
-                     return picModels;
-//                    final List<PicModel> _picModels = picModels;
-//                    return Flowable.create(new FlowableOnSubscribe<List<PicModel>>() {
-//                        @Override
-//                        public void subscribe(@NonNull FlowableEmitter<List<PicModel>> e) throws Exception {
-//                            int Size = _picModels.size();
-//                            int start = 0;
-//                            int end = 0;
-//                            for(int i=0; ; i++){
-//                                start = end;
-//                                end = (i+1)*5;
-//                                Thread.sleep(300);
-//                                if(end <= Size)
-//                                    e.onNext(_picModels.subList(start,end-1));
-//                                else {
-//                                    e.onNext(_picModels.subList(start,Size - 1));
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                    }, BackpressureStrategy.BUFFER);
-                }).doOnNext(picModels -> SiteDbApi.insertOrUpdate(picModels));
+                    JsonElement element = new JsonParser().parse(s);
+                    //JsonArray jsonArray = element.getAsJsonArray(); //TextUtils.isEmpty(jsonArray.get(0).getAsJsonObject().get("url").getAsString())
+                    if(element.isJsonArray())
+                        for (JsonElement el : element.getAsJsonArray()) {
+                            PicModel picModel = new PicModel();
+                            picModel.url = el.getAsString();
+                            picModel.QueryKey = key;
+                            picModels.add(picModel);
+                        }
+                    else picModels = DataFactory.JsonToList(s,PicModel.class);
+                    return picModels;
+                }).doOnNext(SiteDbApi::insertOrUpdate);
 
     }
 

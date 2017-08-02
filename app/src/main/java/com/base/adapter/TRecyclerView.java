@@ -163,7 +163,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
                         }
                         else getSpan = 1;
                     }
-                    KLog.json("position = " + position + " getSpan = " + getSpan +" itemViewType = " + itemViewType + " Type = " + R.layout.list_footer_view);
+                    //KLog.json("position = " + position + " getSpan = " + getSpan +" itemViewType = " + itemViewType + " Type = " + R.layout.list_footer_view);
                     return  getSpan;
                 }
             });

@@ -1,7 +1,6 @@
 package com.ui.tag;
 
 import android.app.Dialog;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -53,12 +52,7 @@ public class TabDialog extends DialogFragment {
         Dialog dialog =  super.onCreateDialog(savedInstanceState);
         //dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
-        TypeSelector<Tags> tagsTypeSelector = new TypeSelector<Tags>() {
-            @Override
-            public int getType(Tags tags) {
-                return !TextUtils.isEmpty(tags.group) ? R.layout.tab_dialog_item1 : R.layout.tab_dialog_item2;
-            }
-        };
+        TypeSelector<Tags> tagsTypeSelector = (tags) -> !TextUtils.isEmpty(tags.group) ? R.layout.tab_dialog_item1 : R.layout.tab_dialog_item2;
 
         TRecyclerView<Tags> tRecyclerView = new TRecyclerView<>(getContext());
         tRecyclerView.setType_SpanCount(R.layout.tab_dialog_item1,1)
@@ -112,7 +106,8 @@ public class TabDialog extends DialogFragment {
     public void onStart() {
         super.onStart();
         Window window = getDialog().getWindow();
-        window.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.backgroundCard)));
+        //注释掉 占满屏幕就不起作用了
+        //window.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.backgroundCard)));
 
         DisplayMetrics dm = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
