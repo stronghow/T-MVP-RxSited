@@ -87,7 +87,7 @@ public class NetFactory {
                             C.sSectionses = DataFactory.JsonToBean(s,BookModel.class).sections;
                             getBookBy(C.sSectionses,tag); //维持正序
                             return C.sSectionses;
-                        }).doOnNext(sectionses -> SiteDbApi.insertOrUpdate(sectionses)));
+                        }).doOnNext(SiteDbApi::insertOrUpdate));
     }
 
 
