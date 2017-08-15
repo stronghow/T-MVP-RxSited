@@ -14,6 +14,6 @@ public interface EventTags {
     /**
      * sited
      */
-
-    int CURRENT_ITEM = 0x00005;
+    int SECTION_PAGE = 0x0001;
+    int CURRENT_ITEM = 0x0005;
 }

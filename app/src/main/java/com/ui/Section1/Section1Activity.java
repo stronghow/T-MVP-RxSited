@@ -9,15 +9,19 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.C;
+import com.EventTags;
 import com.app.annotation.apt.Extra;
 import com.app.annotation.apt.Router;
 import com.base.BaseActivity;
 import com.base.entity.DataExtra;
+import com.base.event.OkBus;
 import com.model.Sections;
 import com.sited.RxSource;
 import com.socks.library.KLog;
 import com.ui.main.R;
 import com.ui.main.databinding.ActivitySitedSectionBinding;
+
+import java.util.List;
 
 /**
  * Created by haozhong on 2017/4/4.
@@ -31,6 +35,9 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
 
     @Extra(C.SOURCE)
     public RxSource rxSource;
+
+    @Extra(C.SECTIONS)
+    public List<Sections> sectionsList;
 
     private BatteryReceiver batteryReceiver;
 
@@ -52,6 +59,7 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
         mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(), DataExtra.create()
                 .add(C.MODEL,model)
                 .add(C.SOURCE,rxSource)
+                .add(C.SECTIONS,sectionsList)
                 .build());
     }
 
@@ -70,7 +78,7 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
     protected void onDestroy() {
         super.onDestroy();
         //更新Sections
-
+        OkBus.getInstance().onEvent(EventTags.SECTION_PAGE,mViewBinding.listItem.getPresenter().getBegin()-1);
             unregisterReceiver(batteryReceiver);
         if(mViewBinding.listItem.getPresenter()!=null)
             mViewBinding.listItem.getPresenter().unsubscribe();

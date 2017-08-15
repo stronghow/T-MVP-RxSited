@@ -7,6 +7,7 @@ import org.dom4j.Element;
 import org.dom4j.VisitorSupport;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by haozhong on 2017/5/20.
@@ -70,31 +71,40 @@ public class Visitor extends VisitorSupport {
                 source.updates.build();
                 break;
             case "tags":
-                source.tags = new RxNode(source);
-                for(Attribute attribute : node.attributes())
-                    source.tags.attrs.set(attribute.getName(),attribute.getValue());
-                if(node.elements().size()>0) {
-                    StringBuilder sb = new StringBuilder("[");
-                    for (Element item : node.elements()) {
-                        sb.append("{");
-                        for (Attribute attr : item.attributes()) {
-                          sb.append("\"").append(attr.getName()).append("\":\"").append(attr.getValue()).append("\",");
+                if(source.tags == null) {
+                    source.tags = new RxNode(source);
+                    for (Attribute attribute : node.attributes())
+                        source.tags.attrs.set(attribute.getName(), attribute.getValue());
+                    List<Element> items = node.elements("item");
+                    if (items.size() > 0) {
+                        StringBuilder sb = new StringBuilder("[");
+                        for (Element item : items) {
+                            sb.append("{");
+                            for (Attribute attr : item.attributes()) {
+                                sb.append("\"").append(attr.getName()).append("\":\"").append(attr.getValue()).append("\",");
+                            }
+                            sb.deleteCharAt(sb.length() - 1);
+                            sb.append("},");
                         }
                         sb.deleteCharAt(sb.length() - 1);
-                        sb.append("},");
+                        sb.append("]");
+                        source.tags.staticData = sb.toString();
+                        KLog.json("Tags = " + source.tags.staticData);
                     }
-                    sb.deleteCharAt(sb.length() - 1);
-                    sb.append("]");
-                    source.tags.staticData = sb.toString();
-                    KLog.json("Tags = " + source.tags.staticData);
+                    Element tags = node.element("tags");
+                    if(tags != null) {
+                        for (Attribute attribute : node.element("tags").attributes())
+                            source.tags.attrs.set(attribute.getName(), attribute.getValue());
+                    }
+                    source.tags.build();
                 }
-                source.tags.build();
                 break;
             case "tag":
-                source.tag = new RxNode(source);
-                for(Attribute attribute : node.attributes())
-                    source.tag.attrs.set(attribute.getName(),attribute.getValue());
-                source.tag.build();
+                if(source.tag == null)
+                    source.tag  = RxNodeSet.getInstance()
+                            .setRxSource(source)
+                            .setNode(node)
+                            .build();
                 break;
             case "book":
                 if(source.book == null) {

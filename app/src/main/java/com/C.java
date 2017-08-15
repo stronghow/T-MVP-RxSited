@@ -10,8 +10,6 @@ import java.util.List;
  */
 public class C {
 
-
-
     //==================intent============//
     public static final String TRANSLATE_VIEW = "share_img";
 
@@ -40,6 +38,8 @@ public class C {
 
     public static final String REFURL = "refurl";
 
+    public static final String SECTIONS = "sections";
+
     public static final int NO_MORE = -1;
 
     public static final String GET_FAVICON = "http://g.soz.im/{url}/cdn.ico?defaulticon=wp";
@@ -52,14 +52,6 @@ public class C {
     public static final String LOAD_DEFAULT = "load_default"; //（默认）根据cache-control决定是否从网络上取数据。
     public static final String LOAD_NO_CACHE = "load_no_cache";  //不使用缓存，只从网络获取数据.
     public static final String LOAD_CACHE_ELSE_NETWORK = "load+_cache_else_network"; //只要本地有，无论是否过期，或者no-cache，都使用缓存中的数据。
-
-    public static List<Sections> sSectionses = new ArrayList<>();
-
-    public static int oldIndex;
-
-    public static int newIndex;
-
-    public static boolean isReverse;
 
     public static final String BATTERY = "Battery"; //获取低昂量
 

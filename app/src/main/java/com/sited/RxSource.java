@@ -43,7 +43,7 @@ public class RxSource {
     public RxNode updates;
     public RxNode tags;
     public RxNode search;
-    public RxNode tag;
+    public RxNodeSet tag;
     public RxNode book;
     public RxNode sections;
     public RxNodeSet section;
@@ -167,15 +167,22 @@ public class RxSource {
         parseHots(url).subscribe();
         //parseUpdates(url).subscribe();
         if(tags == null) return Flowable.just("[]");
-        else if(tags.staticData != null)
-            return Flowable.just(tags.staticData); // .mergeWith(doGetNodeViewModel(tags,url))
-        else return doGetNodeViewModel(tags,url);
+        else return doGetNodeViewModel(tags,url)
+                .map(s -> {
+                    if(s.equals("[]") && tags.staticData != null) return tags.staticData;
+                    if(!s.equals("[]") && tags.staticData != null)
+                        // [{0}] [{1}] => [{0},{1}]
+                        return tags.staticData.replace("]",",") + s.replace("[","");
+                    else return s;
+                });
     }
 
     public Flowable<String> parseTag(String url,int page){
         if(tag == null) return Flowable.just("[]");
-        String ul = getUrl(tag,url,page);
-        return doGetNodeViewModel(tag,ul);
+        RxNode item = tag.nodeMatch(url);
+        if(item == null) return Flowable.just("[]");
+        String ul = getUrl(item,url,page);
+        return doGetNodeViewModel(item,ul);
     }
 
     public Flowable<String> parseBook(String url){
@@ -192,6 +199,7 @@ public class RxSource {
     }
 
     public Flowable<String> parseSection(String url){
+        if(section == null) return Flowable.just("[]");
         RxNode item = section.nodeMatch(url);
         if(item == null) return Flowable.just("[]");
         String ul = getUrl(item,url);

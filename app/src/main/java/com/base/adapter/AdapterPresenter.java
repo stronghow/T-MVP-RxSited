@@ -34,6 +34,8 @@ public class AdapterPresenter<M> {
     private Disposable mDbSubscription;
     private Disposable mNetSubscription;
 
+    private DataFromListener dataFromListener;
+
     interface IAdapterView<M> {
         void setEmpty();
 
@@ -44,6 +46,14 @@ public class AdapterPresenter<M> {
         void setData(List<M> data, int begin);
 
         void reSetEmpty();
+    }
+
+    public interface DataFromListener{
+        void Call(Boolean isFromNet);
+    }
+
+    public void setDataFromListener(DataFromListener dataFromListener){
+        this.dataFromListener = dataFromListener;
     }
 
     AdapterPresenter(IAdapterView mIAdapterViewImpl) {
@@ -129,6 +139,8 @@ public class AdapterPresenter<M> {
                                 } else {
                                     Refreshing = false;
                                     KLog.json("getDbData()");
+                                    if(dataFromListener != null)
+                                        dataFromListener.Call(false);
                                     view.setData(r, begin);
                                 }
                             },
@@ -154,7 +166,11 @@ public class AdapterPresenter<M> {
             mNetSubscription = mNetRepository
                     .getData(param)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(res -> view.setData(res, begin),
+                    .subscribe(res -> {
+                                if(dataFromListener != null)
+                                    dataFromListener.Call(true);
+                                view.setData(res, begin);
+                        },
                             err -> { Refreshing = false;err.printStackTrace();},
                             ()-> {
                                 Refreshing = false;

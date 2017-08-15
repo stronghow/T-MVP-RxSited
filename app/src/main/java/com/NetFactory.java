@@ -86,22 +86,14 @@ public class NetFactory {
 
     public static Flowable<List<Sections>> getBook(HashMap<String, Object> param){
         final Tag tag = (Tag)param.get(C.MODEL);
-        C.oldIndex = 0;
             //sited::获取book节点的数据
         final RxSource rxSource = (RxSource)param.get(C.SOURCE);
 
-//       return Flowable.timer(300, TimeUnit.MILLISECONDS)
-//                .flatMap(aLong -> rxSource.parseSections(tag.url)
-//                        .map(s ->{
-//                            C.sSectionses = DataFactory.JsonToBean(s,BookModel.class).sections;
-//                            getBookBy(C.sSectionses,tag); //维持正序
-//                            return C.sSectionses;
-//                        }).doOnNext(SiteDbApi::insertOrUpdate));
         return rxSource.parseSections(tag.url)
                         .map(s ->{
-                            C.sSectionses = DataFactory.JsonToBean(s,BookModel.class).sections;
-                            getBookBy(C.sSectionses,tag); //维持正序
-                            return C.sSectionses;
+                            List<Sections> sectionsList = DataFactory.JsonToBean(s,BookModel.class).sections;
+                            getBookBy(sectionsList,tag); //维持正序
+                            return sectionsList;
                         }).doOnNext(SiteDbApi::insertOrUpdate);
     }
 
@@ -109,25 +101,23 @@ public class NetFactory {
     public static Flowable<List<PicModel>> getSection(HashMap<String, Object> param){
         Sections sections = (Sections) param.get(C.MODEL);
         final RxSource rxSource = (RxSource)param.get(C.SOURCE);
+        List<Sections> sectionsList = (ArrayList<Sections>) param.get(C.SECTIONS);
         final int index = sections.index;
         int page = (int)param.get(C.PAGE) -1;
-        if(index + page == C.sSectionses.size()) { //已经到最底
+        if(index + page == sectionsList.size()) { //已经到最底
             KLog.json("已经到最底部");
             return Observable_NULL();
         }
 
-        sections = C.sSectionses.get(index + page);
+        sections = sectionsList.get(index + page);
         while (TextUtils.isEmpty(sections.url)){ //跳过分组标题
             page++;
-            if(index + page == C.sSectionses.size()) { //已经到最底部
+            if(index + page == sectionsList.size()) { //已经到最底部
                 KLog.json("已经到最底部");
                 return Observable_NULL();
             }
-            sections = C.sSectionses.get(index + page);
+            sections = sectionsList.get(index + page);
         }
-
-//        C.newIndex = sections.index;
-//        ((Section1Activity)App.getCurActivity()).mViewBinding.listItem.setHashMap(C.BOOKNAME,sections.name);
 
         final String key = sections.url;
 

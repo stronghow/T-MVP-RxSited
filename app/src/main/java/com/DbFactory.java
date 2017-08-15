@@ -121,21 +121,13 @@ public class DbFactory {
     public static Flowable<List<Sections>> getBook(HashMap<String, Object> param){
         Tag model = (Tag)param.get(C.MODEL);
         KLog.json("getBook=" + model.url);
-        LookModel lookModel = Realm.getDefaultInstance()
-                .where(LookModel.class)
-                .equalTo(C.QueryKey,model.url)
-                .findFirst();
-        if(lookModel != null){
-            C.oldIndex = lookModel.index;
-            C.isReverse = lookModel.isReverse;
-        }
+
        return Flowable.just(
                Realm.getDefaultInstance().copyFromRealm(
                Realm.getDefaultInstance()
                .where(Sections.class)
                .equalTo(QueryKey,model.url)
                .findAll()))
-               .doOnNext(sectionses -> C.sSectionses = sectionses)
                .subscribeOn(Schedulers.io());
     }
 
@@ -147,27 +139,25 @@ public class DbFactory {
     public static Flowable<List<PicModel>> getSection(HashMap<String, Object> param){
         KLog.json("DbFactory::getSection");
         Sections model = (Sections) param.get(C.MODEL);
+        List<Sections> sectionsList = (ArrayList<Sections>) param.get(C.SECTIONS);
         int index = model.index;
         int page = (int)param.get(C.PAGE)-1;
         KLog.json("page=" + page + " index=" + index);
         KLog.json("model=" + model.toString());
-        if(index + page == C.sSectionses.size()) { //已经到最底部
+        if(index + page == sectionsList.size()) { //已经到最底部
             KLog.json("已经到最底部");
             return Observable_NULL();
         }
-        model = C.sSectionses.get(index + page);
+        model = sectionsList.get(index + page);
         while (TextUtils.isEmpty(model.url)){ //跳过分组标题
             page++;
-            if(index + page == C.sSectionses.size()) { //已经到最底部
+            if(index + page == sectionsList.size()) { //已经到最底部
                 KLog.json("已经到最底部");
                 return Observable_NULL();
             }
-            model = C.sSectionses.get(index + page);
+            model = sectionsList.get(index + page);
             KLog.json(model.name + model.url + model.QueryKey);
         }
-
-        C.newIndex = model.index;
-
 
         ((Section1Activity)App.getCurActivity()).mViewBinding.listItem.setHashMap(C.BOOKNAME,model.name);
 

@@ -31,7 +31,7 @@ public class App extends Application {
         super.onCreate();
         mCurrent = this;
 
-        //MethodCallAspect.setEnable(false);
+        MethodCallAspect.setEnable(false);
 
         KLog.init(true,"RxSited_Log");
 
