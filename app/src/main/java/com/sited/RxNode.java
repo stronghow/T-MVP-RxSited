@@ -10,7 +10,6 @@ public class RxNode implements IRxNode {
 
     private RxSource rxSource;
 
-    public String nodename;
     public String type;
     public String title;
     public String expr;
@@ -30,10 +29,6 @@ public class RxNode implements IRxNode {
 
     public RxAttributeList attrs = new RxAttributeList();
     public String staticData = null;
-    @Override
-    public int nodeType() {
-        return 0;
-    }
 
     //build
     protected String buildArgs;
@@ -47,7 +42,11 @@ public class RxNode implements IRxNode {
     protected String parse; //解析函数
     protected String parseUrl; //解析出真正在请求的Url
 
-    //ext prop (for post)
+    @Override
+    public int nodeType() {
+        return 0;
+    }
+
 
     @Override
     public RxNode nodeMatch(String url) {
@@ -64,8 +63,11 @@ public class RxNode implements IRxNode {
         return false;
     }
 
-    public void build(RxSource rxSource){
-        this.rxSource  = rxSource;
+    public RxNode(RxSource rxSource){
+        this.rxSource = rxSource;
+    }
+
+    public void build(){
         this.title    = attrs.getString("title");//可能为null
         this.url = attrs.getString("url");
         this.encode = attrs.getString("encode");

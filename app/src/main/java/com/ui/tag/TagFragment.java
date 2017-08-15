@@ -37,12 +37,13 @@ public class TagFragment extends Fragment {
         return tagFragment;
     }
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
       super.onCreateView(inflater, container, savedInstanceState);
         if(tRecyclerView == null){
-            tRecyclerView = new TRecyclerView(getContext());
+            tRecyclerView = new TRecyclerView<>(getContext());
             tRecyclerView.setViewType(R.layout.sited_tag_item);
             tRecyclerView.getCoreAdapter().setOnItemClickListener(new BaseViewHolder.ItemClickListener() {
                 @Override

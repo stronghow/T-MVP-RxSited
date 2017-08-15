@@ -15,11 +15,11 @@ public class Utils {
      * @param pool
      */
     static void importBaseClass(ClassPool pool) {
-        pool.importPackage(LogTimeHelper.LogTimeAnnotation);
-        pool.importPackage(BusHelper.OkBusAnnotation);
-        pool.importPackage(BusHelper.OkBusRegisterAnnotation);
-        pool.importPackage(BusHelper.OkBusUnRegisterAnnotation);
-        pool.importPackage("android.os.Bundle");
+        pool.importPackage(LogTimeHelper.LogTimeAnnotation)
+        pool.importPackage(BusHelper.OkBusAnnotation)
+        pool.importPackage(BusHelper.OkBusRegisterAnnotation)
+        pool.importPackage(BusHelper.OkBusUnRegisterAnnotation)
+        pool.importPackage("android.os.Bundle")
         pool.importPackage("com.base.event.OkBus")
         pool.importPackage("com.base.event.Event")
         pool.importPackage("android.os.Message")

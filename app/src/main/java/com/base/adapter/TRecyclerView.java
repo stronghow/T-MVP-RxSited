@@ -10,19 +10,23 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.C;
+import com.base.util.ToastUtil;
 import com.socks.library.KLog;
 import com.ui.main.R;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -36,12 +40,13 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     private AdapterPresenter<M> mCoreAdapterPresenter;
     private HashMap mMap = new HashMap();
     private boolean isHasHeadView = false, isHasFootView = false, isEmpty = false, isReverse = false,isRefreshable = false,neeHint = false;
-    private int headType, footType, itemType=0, spanCount;
+    private int headType, footType, itemType, spanCount;
     private int lastVisibleItem,total;
-    private SimpleDateFormat ft = new SimpleDateFormat("HH:mm");
+    private SimpleDateFormat ft = new SimpleDateFormat("HH:mm", Locale.getDefault());
     private int begin;
-    private Map<Integer,Integer> Type_SpanCount = new HashMap<>();
-    private int MaxSpanCout = 1;
+    private SparseIntArray Type_SpanCount = new SparseIntArray();
+    private SparseIntArray Pos_SpanCount = new SparseIntArray(); //减少setSpanSizeLookup的多次重复回调所带来的计算
+    private int MaxSpanCount = 1;
 
     public TRecyclerView(Context context) {
         super(context);
@@ -102,14 +107,16 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
         mCommAdapter = new CoreAdapter<>(neeHint);
         recyclerview.setAdapter(mCommAdapter);
         if (itemType != 0) setViewType(itemType);
+        build();
+    }
 
+    private void build(){
         recyclerview.addOnScrollListener(new RecyclerView.OnScrollListener() {
             RecyclerView.LayoutManager layoutManager;
 
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                KLog.json("getBegin()="+mCoreAdapterPresenter.getBegin());
                 if (recyclerview.getAdapter() != null
                         && newState == RecyclerView.SCROLL_STATE_IDLE
                         && lastVisibleItem + 1 == recyclerview.getAdapter().getItemCount()
@@ -134,41 +141,56 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
                 } else {
                     lastVisibleItem = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
                 }
-                //原来代码
-                //lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
                 if(mTextView.getVisibility()==VISIBLE) {
-                    mTextView.setText(mMap.get(C.BOOKNAME) +"   "+ getLastVisibleItem() + "/" + getTotal() + "    " + ft.format(new Date()) + "    " + mMap.get(C.BATTERY));
+                    mTextView.setText(MessageFormat.format("{0}   {1} / {2}   {3}   {4}",
+                            mMap.get(C.BOOKNAME),
+                            getLastVisibleItem(),
+                            getTotal(),
+                            ft.format(new Date()),
+                            mMap.get(C.BATTERY)));
                 }
             }
         });
 
-//        mLayoutManager.setSpanCount(MaxSpanCout);
-//        recyclerview.setLayoutManager(mLayoutManager);
-
         RecyclerView.LayoutManager layoutManager = recyclerview.getLayoutManager();
         if (layoutManager instanceof GridLayoutManager) {
-            ((GridLayoutManager)layoutManager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            ((GridLayoutManager) layoutManager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
                 public int getSpanSize(int position) {
-                    int itemViewType = recyclerview.getAdapter().getItemViewType(position);
-                    int getSpan;
+                    if(Type_SpanCount.size() == 0 ) return 1;
+                    int getSpan = Pos_SpanCount.get(position);
+                    if (getSpan == 0
+                            //不是多种type时，只要数据返回 SpanSize = 1即可
+                            || (position == 0 && Type_SpanCount.size() == 0 && getSpan != 1)
+                            || (position == 0 && Type_SpanCount.size() > 0)
+                        //多种type时，position==0 时 SpanSize = MaxSpanCount （即 headerview）此处特殊化
+                        //||(position == 0 && Type_SpanCount.size() > 0 && getSpan != MaxSpanCount)
+                            ) {
+                        int itemViewType = recyclerview.getAdapter().getItemViewType(position);
 
-                    //只适合两种type的情况
-                    // TODO: 2017/7/24 后期增加多种type的支持 
-                    if (itemViewType == R.layout.list_footer_view) {
-                        getSpan = MaxSpanCout > spanCount ? MaxSpanCout : spanCount;
-                    } else {
-                        if(Type_SpanCount.size() > 0){
-                            getSpan =  MaxSpanCout / Type_SpanCount.get(itemViewType);
+                        //只适合两种type的情况
+                        // TODO: 2017/7/24 只适合两种type的情况,后期增加多种type的支持
+                        if (itemViewType == R.layout.list_footer_view) {
+                            getSpan = MaxSpanCount > spanCount ? MaxSpanCount : spanCount;
+                        } else {
+                            if (Type_SpanCount.size() > 0) {
+                                getSpan = MaxSpanCount / Type_SpanCount.get(itemViewType);
+                            } else getSpan = 1;
                         }
-                        else getSpan = 1;
+                        Pos_SpanCount.put(position, getSpan);
+//                        KLog.json(MessageFormat.format("position = {0}, getSpan = {1}, spanCount = {2}, MaxSpanCount = {3}",
+//                                position,
+//                                getSpan,
+//                                spanCount,
+//                                MaxSpanCount));
                     }
-                    //KLog.json("position = " + position + " getSpan = " + getSpan +" itemViewType = " + itemViewType + " Type = " + R.layout.list_footer_view);
-                    return  getSpan;
+                    return getSpan;
                 }
             });
         } else if (layoutManager instanceof StaggeredGridLayoutManager) {
             //TODO
+        } else {
+            // TODO: 2017/8/4
         }
 
         ll_emptyView.setOnClickListener((view -> {
@@ -208,9 +230,9 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     }
 
     public TRecyclerView<M> setType_SpanCount(@LayoutRes int type,int spanCount) {
-        if(spanCount > MaxSpanCout){
-            MaxSpanCout = spanCount;
-            mLayoutManager.setSpanCount(MaxSpanCout);
+        if(spanCount > MaxSpanCount){
+            MaxSpanCount = spanCount;
+            mLayoutManager.setSpanCount(MaxSpanCount);
         }
         this.Type_SpanCount.put(type,spanCount);
         return this;

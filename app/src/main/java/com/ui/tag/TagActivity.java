@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by haozhong on 2017/4/5.
@@ -55,7 +57,7 @@ public class TagActivity extends BaseActivity<TagPresenter,ActivitySitedTagBindi
     @Override
     public void initView() {
         setTitle(source.title);
-        HashMap map = new HashMap();
+        HashMap<String,Object> map = new HashMap();
         map.put(C.URL,url);
         map.put(C.SOURCE,source);
         mPresenter.getTabList(map);
@@ -67,12 +69,16 @@ public class TagActivity extends BaseActivity<TagPresenter,ActivitySitedTagBindi
     @Override
     public void showTabList(List<Tags> mTabs) {
         KLog.json("进入showTabList");
-        Observable.fromIterable(mTabs).map(tags -> TagFragment.newInstance(source,tags)).toList()
+        Observable.fromIterable(mTabs).map(tags ->TagFragment.newInstance(source,tags)).toList()
                 .map(fragments -> FragmentAdapter.<Tags,TagFragment>newInstance(getSupportFragmentManager(),mTabs,fragments))
-                .subscribe(mFragmentAdapter -> mViewBinding.viewpager.setAdapter(mFragmentAdapter));
-        PagerChangeListener mPagerChangeListener = PagerChangeListener.newInstance(mViewBinding.collapsingToolbar,mViewBinding.toolbarIvTarget,mViewBinding.toolbarIvOutgoing,new String[mTabs.size()]);
-        mViewBinding.viewpager.addOnPageChangeListener(mPagerChangeListener);
-        mViewBinding.tabs.setupWithViewPager(mViewBinding.viewpager);
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mFragmentAdapter -> {
+                    PagerChangeListener mPagerChangeListener = PagerChangeListener.newInstance(mViewBinding.collapsingToolbar,mViewBinding.toolbarIvTarget,mViewBinding.toolbarIvOutgoing,new String[mTabs.size()]);
+                    mViewBinding.viewpager.addOnPageChangeListener(mPagerChangeListener);
+                    mViewBinding.tabs.setupWithViewPager(mViewBinding.viewpager);
+                    mViewBinding.viewpager.setAdapter(mFragmentAdapter);
+                });
     }
 
     @Bus(EventTags.CURRENT_ITEM)

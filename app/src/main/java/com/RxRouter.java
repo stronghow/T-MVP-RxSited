@@ -34,7 +34,7 @@ public class RxRouter {
         sourceModel.url = sd.url;
         sourceModel.sited = sited;
         SiteDbApi.insertOrUpdate(sourceModel);
-        HashMap map = new HashMap();
+        HashMap<String,Object> map = new HashMap<>();
         map.put(C.URL,null);
         map.put(C.SOURCE,sd);
         TRouter.go(C.TAG,map);
@@ -51,6 +51,7 @@ public class RxRouter {
             KLog.json("navByUri", ".sited");
             String Html = HttpUtil.getHtml(webUrl);
             RxSource sd = RxSourceApi.getRxSource(Html);
+            if(sd == null) return;
             if(sd.tags == null) {
                 ToastUtil.show("对不起,暂时不支持无Tags节点的插件:)");
                 return;
@@ -61,7 +62,7 @@ public class RxRouter {
             model.title = sd.title;
             model.url = sd.url;
             SiteDbApi.insertOrUpdate(model);
-            HashMap map = new HashMap();
+            HashMap<String,Object> map = new HashMap<>();
             map.put(C.URL,sd.url);
             map.put(C.SOURCE,sd);
             TRouter.go(C.TAG,map);

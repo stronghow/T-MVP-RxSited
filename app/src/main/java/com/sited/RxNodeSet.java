@@ -10,30 +10,48 @@ import java.util.List;
  */
 public class RxNodeSet implements IRxNode {
 
-    List<RxNode> items;
+    private List<RxNode> items;
+
+    private RxSource rxSource;
+
+    private Element node;
 
     public static RxNodeSet getInstance(){
         return new RxNodeSet();
     }
 
-    public RxNodeSet build(Element node, RxSource rxSource){
+    public RxSource getRxSource() {
+        return rxSource;
+    }
+
+    public RxNodeSet setRxSource(RxSource rxSource){
+        this.rxSource = rxSource;
+        return this;
+    }
+
+    public RxNodeSet setNode(Element node){
+        this.node = node;
+        return this;
+    }
+
+    public RxNodeSet build(){
         items = new ArrayList<>();
         if(node.elements().size()>0) {
             for (Element element : node.elements()) {
-                RxNode rxNode = new RxNode();
+                RxNode rxNode = new RxNode(rxSource);
                 for (Attribute attr : element.attributes()) {
                     //System.out.println("key = " + attr.getName() +" value = " + attr.getValue());
                     rxNode.attrs.set(attr.getName(), attr.getValue());
                 }
-                rxNode.build(rxSource);
+                rxNode.build();
                 items.add(rxNode);
             }
         }else{
-            RxNode rxNode = new RxNode();
+            RxNode rxNode = new RxNode(rxSource);
             for (Attribute attr : node.attributes()) {
                 rxNode.attrs.set(attr.getName(), attr.getValue());
             }
-            rxNode.build(rxSource);
+            rxNode.build();
             items.add(rxNode);
         }
         return this;
@@ -41,6 +59,7 @@ public class RxNodeSet implements IRxNode {
 
     private RxNodeSet(){
     }
+
 
     @Override
     public boolean isEmpty() {

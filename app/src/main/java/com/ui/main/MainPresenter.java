@@ -30,7 +30,7 @@ public class MainPresenter extends MainContract.Presenter {
     @Override
     public void initAdapterPresenter(AdapterPresenter<SourceModel> mAdapterPresenter, HashMap map) {
         mAdapterPresenter.setDbRepository(DbFactory::getSource)
-                .setBegin(C.NO_MORE)
+                .setNo_MORE(true)
                 .fetch();
     }
 
@@ -38,7 +38,9 @@ public class MainPresenter extends MainContract.Presenter {
     public boolean forIntent(Intent intent, boolean isNewIntent) {
         KLog.json("forIntent");
         if(intent!=null&&intent.getIntExtra("cmd", 0)<=0
+                &&intent.getAction() != null
                 &&intent.getAction().equals(Intent.ACTION_VIEW)
+                &&intent.getData() != null
                 &&intent.getData().getScheme()!=null
                 &&intent.getData().getScheme().equals("sited")) //网络的启动参数
         {
@@ -53,7 +55,7 @@ public class MainPresenter extends MainContract.Presenter {
                 &&intent.getData().getScheme()!=null
                 &&intent.getData().getScheme().equals("file")) //本地文件启动参数
         {
-            if(intent.getData().toString().indexOf(".sited")<0) {
+            if(!intent.getData().toString().contains(".sited")) {
                 ToastUtil.show("不是有效插件");
                 return false;
             }else{

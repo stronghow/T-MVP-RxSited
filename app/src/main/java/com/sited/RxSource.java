@@ -2,6 +2,7 @@ package com.sited;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 
 import com.socks.library.KLog;
@@ -16,12 +17,14 @@ import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by haozhong on 2017/5/22.
  */
 public class RxSource {
     private static Application context;
+    private static OkHttpClient mHttpClient;
     private static HashMap<String,RxSource> rxSourceMap = new HashMap<>();
     public static final String defUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240";
     public static final String CALL = "CALL::";
@@ -47,11 +50,20 @@ public class RxSource {
     public List<Lib> require;
 
     private JsEngine jsEngine;
-    private RxJscript rxJscript;
 
 
     public static void init(Application app){
         context = app;
+        if (mHttpClient == null) {
+            mHttpClient = new OkHttpClient();
+        }
+    }
+
+    public static OkHttpClient getHttpClient() {
+        if (mHttpClient == null) {
+            mHttpClient = new OkHttpClient();
+        }
+        return mHttpClient;
     }
 
     public static void put(String url,RxSource rxSource){
@@ -69,12 +81,12 @@ public class RxSource {
     }
 
     public RxSource(){
+        jsEngine = new JsEngine();
         //set(this);
     }
 
     //预加载 js
     public void PreLoadJS(){
-        jsEngine = new JsEngine();
         RxJscript.load(jsEngine,code,require);
     }
 
@@ -134,23 +146,26 @@ public class RxSource {
     }
 
     public Flowable<String> parseHots(String url){
+        if(hots == null) return Flowable.just("[]");
         String ul = getUrl(hots,url);
         return doGetNodeViewModel(hots,ul);
     }
 
     public Flowable<String> parseUpdates(String url){
+        if(updates == null) return Flowable.just("[]");
         String ul = getUrl(updates,url);
         return doGetNodeViewModel(updates,ul);
     }
 
     public Flowable<String> parseSearch(String url,String key){
+        if(search == null) return Flowable.just("[]");
         String ul = getUrl(search,url,key);
         return doGetNodeViewModel(search,ul);
     }
 
     public Flowable<String> parseTags(String url){
-        parseHots(url).subscribe(KLog::json);
-        parseUpdates(url).subscribe(KLog::json);
+        parseHots(url).subscribe();
+        //parseUpdates(url).subscribe();
         if(tags == null) return Flowable.just("[]");
         else if(tags.staticData != null)
             return Flowable.just(tags.staticData); // .mergeWith(doGetNodeViewModel(tags,url))
@@ -158,11 +173,13 @@ public class RxSource {
     }
 
     public Flowable<String> parseTag(String url,int page){
+        if(tag == null) return Flowable.just("[]");
         String ul = getUrl(tag,url,page);
         return doGetNodeViewModel(tag,ul);
     }
 
     public Flowable<String> parseBook(String url){
+        if(book == null) return Flowable.just("[]");
         String ul = getUrl(book,url);
         return doGetNodeViewModel(book,ul);
     }
@@ -176,14 +193,16 @@ public class RxSource {
 
     public Flowable<String> parseSection(String url){
         RxNode item = section.nodeMatch(url);
+        if(item == null) return Flowable.just("[]");
         String ul = getUrl(item,url);
         return doGetNodeViewModel(item,ul);
     }
 
-    public Flowable<String> doGetNodeViewModel(final RxNode cfg, final String url) {
+    private Flowable<String> doGetNodeViewModel(@NonNull final RxNode cfg,@NonNull final String url) {
        return Flowable.create(new FlowableOnSubscribe<String>() {
             @Override
             public void subscribe(@NonNull FlowableEmitter<String> e) throws Exception {
+                KLog.json("RxThread ->" + Thread.currentThread().getName());
                 String html = HttpUtil.getHtml(cfg,url);
                 if (!TextUtils.isEmpty(cfg.parseUrl)) {
                     String parseUrl = rxParseUrl(cfg, url, html).blockingFirst();
@@ -199,16 +218,17 @@ public class RxSource {
                     KLog.json(" urls.length = " + urls.length);
                     for (String u1 : urls) {
                         Thread.sleep(200);
-                        e.onNext(HttpUtil.getHtml(cfg,u1));
+                        e.onNext(HttpUtil.getHtml(cfg, u1));
                     }
                 } else {
                     e.onNext(html);
                 }
                 e.onComplete();
             }
-        },BackpressureStrategy.BUFFER).concatMap(html -> rxParse(cfg, url, html))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        },BackpressureStrategy.BUFFER)
+                .concatMap(html -> rxParse(cfg, url, html))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(Schedulers.io());
     }
 
     @Override

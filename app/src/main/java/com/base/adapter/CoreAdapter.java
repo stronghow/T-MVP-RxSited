@@ -41,6 +41,7 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
 
     CoreAdapter(boolean needHint) {
         this.needHint = needHint;
+        // 去掉正在加载  已经到底
         mFootTypeDatas.add(new Item(mFooterViewType, true));
     }
 

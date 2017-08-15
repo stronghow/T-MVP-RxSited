@@ -133,9 +133,9 @@
 #---------------------------------------------------------------------------------------------------
 
 
-#
-#-ignorewarnings
-#
-#-keep class * {
-#    public private *;
-#}
+
+-ignorewarnings
+
+-keep class * {
+    public private *;
+}

@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
  * 功能：自动打印方法的耗时
  **/
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.TYPE})
 public @interface TimeLog {
 }

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.App;
 import com.C;
 import com.NetFactory;
 import com.base.adapter.AdapterPresenter;
@@ -26,11 +27,13 @@ public class SearchFragment extends Fragment {
     private TRecyclerView<Tag> tRecyclerView;
     private String url;
     private String key;
+    private String oldkey;
     private RxSource rxSource;
     public static SearchFragment newInstance(String url,String key,RxSource rxSource){
         SearchFragment searchFragment = new SearchFragment();
         searchFragment.url = url;
         searchFragment.key = key;
+        searchFragment.oldkey = key;
         searchFragment.rxSource = rxSource;
         return searchFragment;
     }
@@ -45,6 +48,16 @@ public class SearchFragment extends Fragment {
         return  tRecyclerView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(tRecyclerView == null) tRecyclerView();
+        if(!oldkey.equals(key)){
+            oldkey = key;
+            tRecyclerView.reFetch();
+        }
+    }
+
     public AdapterPresenter getPresenter(){
         return tRecyclerView.getPresenter();
     }
@@ -55,13 +68,22 @@ public class SearchFragment extends Fragment {
         }else {
             tRecyclerView.getPresenter()
                     .setParam(C.KEY, key)
-                    .setBegin(C.NO_MORE);
+                    .setNo_MORE(true);
+            this.key = key;
+            //tRecyclerView.reFetch();
+        }
+    }
+
+    public void reFetch(){
+        if(tRecyclerView == null) tRecyclerView();
+        if(!oldkey.equals(key)){
+            oldkey = key;
             tRecyclerView.reFetch();
         }
     }
 
     private void tRecyclerView(){
-        tRecyclerView = new TRecyclerView(getContext());
+        tRecyclerView = new TRecyclerView<>(App.getCurActivity());
         tRecyclerView.setViewType(R.layout.sited_tag_item);
         tRecyclerView.setRefreshable(false);
         tRecyclerView.getCoreAdapter().setOnItemClickListener(new BaseViewHolder.ItemClickListener() {
@@ -80,8 +102,8 @@ public class SearchFragment extends Fragment {
                 .setParam(C.KEY,key)
                 .setParam(C.URL,url)
                 .setParam(C.SOURCE,rxSource)
-                .setBegin(C.NO_MORE)
-                .fetch();
+                .setNo_MORE(true);
+        tRecyclerView.reFetch();
     }
 
     @Override

@@ -29,7 +29,7 @@ public class FileUtil {
         return doToString(in);
     }
 
-    static String doToString(BufferedReader in) throws IOException{
+    public static String doToString(BufferedReader in) throws IOException{
         StringBuffer buffer = new StringBuffer();
         String line = "";
         while ((line = in.readLine()) != null){

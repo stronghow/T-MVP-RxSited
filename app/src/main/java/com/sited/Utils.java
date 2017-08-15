@@ -1,10 +1,13 @@
 package com.sited;
 
+import android.util.Base64;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
 /**
@@ -44,6 +47,15 @@ public class Utils {
             throw new NullPointerException(message);
         }
         return object;
+    }
+
+    public static String Base64_encode(String text){
+        return Base64.encodeToString(text.getBytes(Charset.forName("UTF-8")),Base64.NO_WRAP);
+    }
+
+    public static String  Base64_decode(String code){
+        byte[] temp = Base64.decode(code.getBytes(), Base64.NO_WRAP);
+        return new String(temp);
     }
 
     /*生成MD5值*/

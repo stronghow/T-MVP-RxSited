@@ -9,7 +9,7 @@ import java.util.List;
  */
 
 public class DataExtra {
-    private HashMap<String, Object>  map = new HashMap();
+    private HashMap<String, Object>  map = new HashMap<>();
 
     public DataExtra(){}
 
@@ -30,11 +30,11 @@ public class DataExtra {
         return this;
     }
 
-    public  HashMap build() {
+    public  HashMap<String, Object> build() {
         return this.map;
     }
 
-    public HashMap toMap(){ return this.map;}
+    public HashMap<String, Object> toMap(){ return this.map;}
 
     public List<DataMap> toList(){
         List<DataMap> dataMapList = new ArrayList<>();

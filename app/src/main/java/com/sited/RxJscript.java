@@ -2,6 +2,7 @@ package com.sited;
 
 import android.text.TextUtils;
 
+import com.socks.library.KLog;
 import com.ui.main.R;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 public class RxJscript {
     private static final String cheerio = Utils.getFileString(R.raw.cheerio);
 
-    public static boolean load(JsEngine js, String code, List<Lib> require){
+    public static void load(JsEngine js, String code, List<Lib> require){
         js.loadJs(code); //fun
         if(require != null && require.size()>0) {  //lib
             for (Lib lib : require) {
@@ -23,7 +24,6 @@ public class RxJscript {
         }else{
             loadLib(js,"cheerio");
         }
-        return true;
     }
 
     private static boolean loadLib(JsEngine js,String lib){
@@ -40,8 +40,9 @@ public class RxJscript {
                     js.loadJs(Utils.getFileString(R.raw.base64));
                     break;
                 case "cheerio":
-                    if(cheerio == null)
+                    if(cheerio == null) {
                         js.loadJs(Utils.getFileString(R.raw.cheerio));
+                    }
                     else js.loadJs(cheerio);
                     break;
                 default:

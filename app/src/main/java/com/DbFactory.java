@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -42,7 +43,7 @@ public class DbFactory {
                 Realm.getDefaultInstance()
                 .where(SourceModel.class)
                 .findAll()))
-                .compose(RxSchedulers.io_main());
+                .subscribeOn(Schedulers.io());
     }
 
 
@@ -68,7 +69,7 @@ public class DbFactory {
                 .where(Tags.class)
                 .equalTo(QueryKey,(String)param.get(C.URL))
                 .findAll()))
-                .compose(RxSchedulers.io_main());
+                .subscribeOn(Schedulers.io());
     }
 
 
@@ -85,7 +86,7 @@ public class DbFactory {
                                 .where(Tag.class)
                                 .equalTo(QueryKey,((Tags)param.get(C.MODEL)).url + param.get(C.PAGE))
                                 .findAll()))
-                .compose(RxSchedulers.io_main());
+                .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -100,7 +101,7 @@ public class DbFactory {
                                 .where(Search.class)
                                 .equalTo(QueryKey,((String)param.get(C.URL)) + param.get(C.KEY))
                                 .findAll()))
-                .compose(RxSchedulers.io_main());
+                     .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -135,7 +136,7 @@ public class DbFactory {
                .equalTo(QueryKey,model.url)
                .findAll()))
                .doOnNext(sectionses -> C.sSectionses = sectionses)
-               .compose(RxSchedulers.io_main());
+               .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -148,7 +149,7 @@ public class DbFactory {
         Sections model = (Sections) param.get(C.MODEL);
         int index = model.index;
         int page = (int)param.get(C.PAGE)-1;
-        KLog.json("page=" + page + " index" + index);
+        KLog.json("page=" + page + " index=" + index);
         KLog.json("model=" + model.toString());
         if(index + page == C.sSectionses.size()) { //已经到最底部
             KLog.json("已经到最底部");
@@ -178,7 +179,7 @@ public class DbFactory {
                 .where(PicModel.class)
                 .equalTo(C.QueryKey,QueryKey)
                 .findAll()))
-                .compose(RxSchedulers.io_main());
+                .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -187,6 +188,6 @@ public class DbFactory {
      * @return Observable
      */
     private static <M> Flowable<List<M>> Observable_NULL(){
-        return Flowable.just(new ArrayList<M>(0)).compose(RxSchedulers.io_main());
+        return Flowable.just(new ArrayList<M>(0));
     }
 }

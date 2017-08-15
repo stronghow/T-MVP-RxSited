@@ -23,9 +23,10 @@
         android:layout_marginLeft="16dp"
         android:layout_height="35dp"
         android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="@color/textColorBg"
         android:longClickable="true"
 
-        android:background="?attr/backgroundCard">
+        >
 
         <!--android:onClick='@{()->RouterHelper.go(C.TAG,DataExtra.create().add(C.SOURCE,RxSourceApi.getRxSource(item.sited)).add(C.URL,item.url).build())}'-->
 

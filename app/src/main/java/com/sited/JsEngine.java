@@ -3,15 +3,23 @@ package com.sited;
 import android.text.TextUtils;
 
 import com.App;
+import com.base.util.LogUtils;
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
+import com.eclipsesource.v8.V8Locker;
+import com.socks.library.KLog;
+
+import java.util.concurrent.Executor;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
 import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -20,13 +28,15 @@ import io.reactivex.schedulers.Schedulers;
 
 public class JsEngine {
     private V8 engine = null;
+    private V8Array params = null;
+    private final Scheduler scheduler = Schedulers.single();
+
     protected JsEngine(){  //在哪个线程创建 V8 就要在哪个线程运行 JS 代码
-        App.getCurActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                engine = V8.createV8Runtime(null, RxSource.getContext().getApplicationInfo().dataDir);
-            }
-        });
+            Flowable.just(true)
+                    .subscribeOn(scheduler)
+                    .subscribe(aBoolean ->
+                        engine = V8.createV8Runtime(null, RxSource.getContext().getApplicationInfo().dataDir)
+                    );
     }
 
     /**
@@ -35,17 +45,13 @@ public class JsEngine {
      * @return
      */
 
-    public synchronized void loadJs(String js){
-        App.getCurActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                engine.executeScript(js);
-            }
-        });
-//        Observable.just(js)
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(s -> engine.executeScript(s)
-//                        , throwable -> LogUtils.showLog("JsEngine.loadJs", throwable.getMessage()));
+    public void loadJs(String js){
+        Flowable.just(js)
+                .subscribeOn(scheduler)
+                .subscribe(s -> {
+                    KLog.json(s);
+                    engine.executeScript(s);
+                });
     }
 
 
@@ -61,7 +67,7 @@ public class JsEngine {
             @Override
             public void subscribe(@NonNull FlowableEmitter<String> e) throws Exception {
                 String json;
-                V8Array params = new V8Array(engine);
+                params = new V8Array(engine);
                 for (String p : args) {
                     params.push(p);
                 }
@@ -71,7 +77,6 @@ public class JsEngine {
                 e.onComplete();
             }
         }, BackpressureStrategy.BUFFER)
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .observeOn(Schedulers.io());
+        .subscribeOn(scheduler);
     }
 }

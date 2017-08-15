@@ -54,7 +54,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:isRefreshable="false"
-                    app:spanCount="2"
+                    app:spanCount="3"
                     app:itemType="@layout/sited_source_item" />
 
             </android.support.v4.widget.NestedScrollView>

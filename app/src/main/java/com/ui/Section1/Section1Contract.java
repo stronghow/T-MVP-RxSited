@@ -17,7 +17,7 @@ public interface Section1Contract {
     }
 
     abstract class Presenter extends BasePresenter<View>{
-        public abstract void initAdapterPresenter(AdapterPresenter<PicModel> mAdapterPresenter, HashMap map);
+        public abstract void initAdapterPresenter(AdapterPresenter<PicModel> mAdapterPresenter, HashMap<String, Object> map);
 
         @Override
         public void onAttached() {

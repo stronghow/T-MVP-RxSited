@@ -21,20 +21,20 @@ public class SearchPresenter extends SearchContrat.Presenter {
         KLog.json("SearchPresenter::getTabList");
         List<Tab> tabs = new ArrayList<>();
         DbFactory.getSource(null)
-                .subscribe(sourceModels -> {
-                   for(SourceModel sourceModel : sourceModels) {
-                       RxSource rxSource;
-                       rxSource = RxSource.get(sourceModel.url);
-                       if(rxSource == null) rxSource = RxSourceApi.getRxSource(sourceModel.sited);
-                       if(rxSource != null && rxSource.search != null) {
-                           tabs.add(new Tab(rxSource.title,rxSource.search.url,rxSource));
+                  .subscribe(sourceModels -> {
+                       for(SourceModel sourceModel : sourceModels) {
+                           RxSource rxSource;
+                           rxSource = RxSource.get(sourceModel.url);
+                           if(rxSource == null) rxSource = RxSourceApi.getRxSource(sourceModel.sited);
+                           if(rxSource != null && rxSource.search != null) {
+                               tabs.add(new Tab(rxSource.title,rxSource.search.url,rxSource));
+                           }
                        }
-                   }
-                   showTabList(tabs);
+                  showTabList(tabs);
                 });
     }
 
-    public void showTabList(List<Tab> tabs) {
+    private void showTabList(List<Tab> tabs) {
         mView.showTabList(tabs);
     }
 }

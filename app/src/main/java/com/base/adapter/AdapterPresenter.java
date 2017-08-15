@@ -5,11 +5,13 @@ import com.C;
 import com.base.DbRepository;
 import com.base.NetRepository;
 import com.base.util.NetWorkUtil;
+import com.base.util.helper.RxSchedulers;
 import com.socks.library.KLog;
 
 import java.util.HashMap;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 /**
@@ -119,6 +121,7 @@ public class AdapterPresenter<M> {
         if (mDbRepository != null) {
             mDbSubscription = mDbRepository
                     .getData(param)
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(r -> {
                                 if (r == null || r.size() == 0) {
                                     begin--; //抵消前面的begin++
@@ -150,6 +153,7 @@ public class AdapterPresenter<M> {
         if(mNetRepository != null && NetWorkUtil.isNetConnected(App.getContext()))
             mNetSubscription = mNetRepository
                     .getData(param)
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(res -> view.setData(res, begin),
                             err -> { Refreshing = false;err.printStackTrace();},
                             ()-> {

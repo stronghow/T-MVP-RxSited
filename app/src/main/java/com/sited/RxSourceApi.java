@@ -1,5 +1,8 @@
 package com.sited;
 
+import android.support.annotation.NonNull;
+
+import com.app.annotation.aspect.MemoryCache;
 import com.socks.library.KLog;
 import com.utils.Base64Util;
 
@@ -26,9 +29,11 @@ public class RxSourceApi {
         KLog.json("时间 = " + (System.currentTimeMillis() - time));
         source.PreLoadJS();
         KLog.json("时间 = " + (System.currentTimeMillis() - time));
+        RxSource.put(source.url,source); //缓存RxSource
         return source;
     }
 
+    @MemoryCache
     public static RxSource getRxSource(String xml){
         try {
             RxSource source = new RxSource();
@@ -40,7 +45,7 @@ public class RxSourceApi {
             KLog.json("时间 = " + (System.currentTimeMillis() - time));
             source.PreLoadJS();
             KLog.json("时间 = " + (System.currentTimeMillis() - time));
-            RxSource.put(source.url,source);
+            RxSource.put(source.url,source); //缓存RxSource
             return source;
         }catch (DocumentException e){
             e.printStackTrace();
@@ -56,12 +61,11 @@ public class RxSourceApi {
             String key = xml.substring(end + 2);
            return unsuan(txt, key);
         }
-            return xml;
+        return xml;
     }
 
+    @NonNull
     private static String unsuan(String str, String key) {
-        //Charset coder = Charset.forName("UTF-8");
-
         StringBuilder sb = new StringBuilder();
         for (int i = 0, len = str.length(); i < len; i++) {
             if (i % 2 == 0) {
@@ -70,7 +74,7 @@ public class RxSourceApi {
         }
 
         str = sb.toString();
-        str = Base64Util.decode(str);
+        str = Utils.Base64_decode(str);
         key = key + "ro4w78Jx";
 
         Charset coder = Charset.forName("UTF-8");
@@ -87,6 +91,6 @@ public class RxSourceApi {
         }
         str = new String(data,coder);
 
-        return Base64Util.decode(str);
+        return Utils.Base64_decode(str);
     }
 }

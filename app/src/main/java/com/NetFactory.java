@@ -14,6 +14,7 @@ import com.model.Tag;
 import com.model.Tags;
 import com.sited.RxSource;
 import com.socks.library.KLog;
+import com.ui.Section1.Section1Activity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.base.DataFactory.JsonToList;
 
@@ -36,10 +38,13 @@ public class NetFactory {
      * @return Observable
      */
     public static Flowable<List<Tags>> getTags(HashMap<String, Object> param){
-        String url = (String)param.get(C.URL);
-        RxSource rxSource = (RxSource)param.get(C.SOURCE);
+        final String url = (String)param.get(C.URL);
+        final RxSource rxSource = (RxSource)param.get(C.SOURCE);
         return rxSource.parseTags(url)
-                    .map(s -> JsonToList(s,Tags.class))
+                    .map(s -> {
+                        KLog.json("RxThread ->" + Thread.currentThread().getName());
+                        return JsonToList(s,Tags.class);
+                    })
                     .doOnNext(tagses -> {
                         for (Tags tags : tagses) tags.QueryKey = url;
                         SiteDbApi.insertOrUpdate(tagses);
@@ -48,12 +53,16 @@ public class NetFactory {
     }
 
     public static Flowable<List<Tag>> getTag(HashMap<String, Object> param){
-        Tags _tags = (Tags) param.get(C.MODEL);
-        int page = (int)param.get(C.PAGE);
-        RxSource rxSource = (RxSource)param.get(C.SOURCE);
+        final Tags _tags = (Tags) param.get(C.MODEL);
+        final int page = (int)param.get(C.PAGE);
+        final RxSource rxSource = (RxSource)param.get(C.SOURCE);
         return rxSource.parseTag(_tags.url,page)
-                .map(s -> JsonToList(s,Tag.class))
+                .map(s ->{
+                      KLog.json("RxThread ->" + Thread.currentThread().getName());
+                      return JsonToList(s,Tag.class);
+                })
                 .doOnNext(tags -> {
+                    KLog.json("RxThread ->" + Thread.currentThread().getName());
                     final String key = _tags.url + page;
                     for(Tag tag : tags) tag.QueryKey = key;
                     SiteDbApi.insertOrUpdate(tags);
@@ -62,13 +71,13 @@ public class NetFactory {
     }
 
     public static Flowable<List<Tag>> getSearch(HashMap<String, Object> param){
-        String url = (String) param.get(C.URL);
-        String key = (String)param.get(C.KEY);
-        RxSource rxSource = (RxSource)param.get(C.SOURCE);
-        final String QKey = url + key;
+        final String url = (String) param.get(C.URL);
+        final String key = (String)param.get(C.KEY);
+        final RxSource rxSource = (RxSource)param.get(C.SOURCE);
         return rxSource.parseSearch(url,key)
                 .map(s -> JsonToList(s,Tag.class));
-//                .doOnNext(tags -> {
+//                .doOnNext(tags ->
+//                    final String QKey = url + key;
 //                    for(Tag tag : tags) tag.QueryKey = QKey;
 //                    SiteDbApi.insertOrUpdate(tags);
 //                });
@@ -76,18 +85,24 @@ public class NetFactory {
     }
 
     public static Flowable<List<Sections>> getBook(HashMap<String, Object> param){
-        Tag tag = (Tag)param.get(C.MODEL);
+        final Tag tag = (Tag)param.get(C.MODEL);
         C.oldIndex = 0;
             //sited::获取book节点的数据
-        RxSource rxSource = (RxSource)param.get(C.SOURCE);
+        final RxSource rxSource = (RxSource)param.get(C.SOURCE);
 
-       return Flowable.timer(300, TimeUnit.MILLISECONDS)
-                .flatMap(aLong -> rxSource.parseSections(tag.url)
+//       return Flowable.timer(300, TimeUnit.MILLISECONDS)
+//                .flatMap(aLong -> rxSource.parseSections(tag.url)
+//                        .map(s ->{
+//                            C.sSectionses = DataFactory.JsonToBean(s,BookModel.class).sections;
+//                            getBookBy(C.sSectionses,tag); //维持正序
+//                            return C.sSectionses;
+//                        }).doOnNext(SiteDbApi::insertOrUpdate));
+        return rxSource.parseSections(tag.url)
                         .map(s ->{
                             C.sSectionses = DataFactory.JsonToBean(s,BookModel.class).sections;
                             getBookBy(C.sSectionses,tag); //维持正序
                             return C.sSectionses;
-                        }).doOnNext(SiteDbApi::insertOrUpdate));
+                        }).doOnNext(SiteDbApi::insertOrUpdate);
     }
 
 
@@ -111,23 +126,32 @@ public class NetFactory {
             sections = C.sSectionses.get(index + page);
         }
 
+//        C.newIndex = sections.index;
+//        ((Section1Activity)App.getCurActivity()).mViewBinding.listItem.setHashMap(C.BOOKNAME,sections.name);
+
         final String key = sections.url;
+
         return rxSource.parseSection(sections.url)
                 .map(s -> {
                     KLog.json(s);
+                    KLog.json("RxThread ->" + Thread.currentThread().getName());
                     List<PicModel> picModels = new ArrayList<>();
-                    JsonElement element = new JsonParser().parse(s);
+                    final JsonElement element = new JsonParser().parse(s);
                     //JsonArray jsonArray = element.getAsJsonArray(); //TextUtils.isEmpty(jsonArray.get(0).getAsJsonObject().get("url").getAsString())
-                    if(element.isJsonArray())
+                    if(element.isJsonArray()) {
                         for (JsonElement el : element.getAsJsonArray()) {
-                            PicModel picModel = new PicModel();
+                            final PicModel picModel = new PicModel();
                             picModel.url = el.getAsString();
                             picModel.QueryKey = key;
                             picModels.add(picModel);
                         }
+                    }
                     else picModels = DataFactory.JsonToList(s,PicModel.class);
                     return picModels;
-                }).doOnNext(SiteDbApi::insertOrUpdate);
+                }).doOnNext(picModels -> {
+                    KLog.json("RxThread ->" + Thread.currentThread().getName());
+                    SiteDbApi.insertOrUpdate(picModels);
+                });
 
     }
 
@@ -138,30 +162,27 @@ public class NetFactory {
      */
     private static void getBookBy(List<Sections> sectionses,Tag model){
         if (sectionses.size() > 1) { //大于一条数据
-            int cent = (sectionses.size()-1) / 2;
+            final int cent = (sectionses.size()-1) / 2;
             // 大于0 反序 调换List
             if (sectionses.get(cent).name.compareTo(sectionses.get(cent + 1).name) > 0) {
                 Collections.reverse(sectionses);
             }
-
-            for(int i=0; i< sectionses.size();i++){
-                C.sSectionses.get(i).index = i;
-                C.sSectionses.get(i).QueryKey = model.url;
-            }
-        }else if(sectionses.size()==1){ //只有一条数据不用改
-            sectionses.get(0).QueryKey = model.url;
-            sectionses.get(0).index = 0;
+        }
+        for(int i=0; i< sectionses.size();i++){
+            sectionses.get(i).index = i;
+            sectionses.get(i).QueryKey = model.url;
         }
     }
 
     public static void reverse(List<Sections> sectionses){
         Collections.reverse(sectionses);
         for(int i=0; i< sectionses.size();i++){
-            C.sSectionses.get(i).index = i;
+            sectionses.get(i).index = i;
         }
     }
 
-    private static Flowable Observable_NULL(){
-        return Flowable.just(new ArrayList(0)).compose(RxSchedulers.io_main());
+    private static <M> Flowable<List<M>> Observable_NULL(){
+        return Flowable.just(new ArrayList<M>(0));
     }
 }
+

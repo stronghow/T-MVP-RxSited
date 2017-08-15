@@ -2,6 +2,7 @@ package com.ui.Search;
 
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
+import android.view.MenuItem;
 
 import com.C;
 import com.app.annotation.apt.Router;
@@ -11,10 +12,13 @@ import com.model.Tab;
 import com.socks.library.KLog;
 import com.ui.main.R;
 import com.ui.main.databinding.ActivitySitedSearchBinding;
+import com.ui.tag.TabDialog;
 
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by haozhong on 2017/5/4.
@@ -36,7 +40,14 @@ public class SearchActivity extends BaseActivity<SearchPresenter,ActivitySitedSe
 //    public int getMenuId() {
 //        return R.menu.menu_tag;
 //    }
-
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        if(item.getItemId() == R.id.action_tab)
+//            ;
+//            //TabDialog.getInstance(url).start(getSupportFragmentManager());
+//        return true;
+//    }
 
     @Override
     public void initView() {
@@ -51,12 +62,14 @@ public class SearchActivity extends BaseActivity<SearchPresenter,ActivitySitedSe
                 KLog.json("搜索 = " + query);
                 key = query;
                 if(!TextUtils.isEmpty(query)) {
-                    if (fragments != null)
+                    if (fragments != null) {
                         for (SearchFragment fragment : fragments) {
                             if (fragment != null)
                                 fragment.updateData(query);
                         }
-                    else{
+                        if(fragments.get(mViewBinding.viewpager.getCurrentItem()) != null)
+                            fragments.get(mViewBinding.viewpager.getCurrentItem()).reFetch();
+                    }else{
                         mPresenter.getTabList();
                     }
                 }
@@ -74,9 +87,13 @@ public class SearchActivity extends BaseActivity<SearchPresenter,ActivitySitedSe
     public void showTabList(List<Tab> mTabs) {
         KLog.json("进入showTabList = " + mTabs.size());
         Observable.fromIterable(mTabs)
-                .map(tabs -> SearchFragment.newInstance(tabs.url,key,tabs.rxSource))
+                .map(tabs -> {
+                    KLog.json("RxThread ->" + Thread.currentThread().getName());
+                    return SearchFragment.newInstance(tabs.url,key,tabs.rxSource);})
                 .toList()
                 .doOnSuccess(searchFragments ->  fragments = searchFragments)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(searchFragments -> {
                     mViewBinding.viewpager.setAdapter( FragmentAdapter.<Tab,SearchFragment>newInstance(getSupportFragmentManager(),mTabs,searchFragments));
                     mViewBinding.tabs.setupWithViewPager(mViewBinding.viewpager);

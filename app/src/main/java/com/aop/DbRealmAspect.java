@@ -7,6 +7,7 @@ import org.aspectj.lang.annotation.Pointcut;
 
 import java.util.List;
 
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
@@ -29,7 +30,7 @@ public class DbRealmAspect {
     public void aroundJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
         joinPoint.proceed();//执行原方法
         Realm realm = Realm.getDefaultInstance();
-        Observable.fromArray(joinPoint.getArgs())
+        Flowable.fromArray(joinPoint.getArgs())
                 .filter(new Predicate<Object>() {
                     @Override
                     public boolean test(@NonNull Object obj) throws Exception {

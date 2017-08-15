@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.base.util.LogUtils;
 import com.base.util.MemoryCacheManager;
+import com.socks.library.KLog;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -38,14 +39,14 @@ public class MemoryCacheAspect {
         }
         String key = keyBuilder.toString();
         Object result = mMemoryCacheManager.get(key);//key规则 ： 方法名＋参数1+参数2+...
-        LogUtils.showLog("MemoryCache", "key：" + key + "--->" + (result != null ? "not null" : "null"));
+        KLog.json("MemoryCache", "key：" + key + "--->" + (result != null ? "not null" : "null"));
         if (result != null) return result;//缓存已有，直接返回
         result = joinPoint.proceed();//执行原方法
         if (result instanceof List && result != null && ((List) result).size() > 0 //列表不为空
                 || result instanceof String && !TextUtils.isEmpty((String) result)//字符不为空
                 || result instanceof Object && result != null)//对象不为空
             mMemoryCacheManager.add(key, result);//存入缓存
-        LogUtils.showLog("MemoryCache", "key：" + key + "--->" + "save");
+        KLog.json("MemoryCache", "key：" + key + "--->" + "save");
         return result;
     }
 }

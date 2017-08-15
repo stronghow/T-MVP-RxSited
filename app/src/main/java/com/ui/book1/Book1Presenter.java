@@ -17,12 +17,12 @@ import java.util.HashMap;
 public class Book1Presenter extends Book1Contract.Presenter {
 
     @Override
-    public void initAdapterPresenter(AdapterPresenter<Sections> mAdapterPresenter, HashMap map) {
+    public void initAdapterPresenter(AdapterPresenter<Sections> mAdapterPresenter, HashMap<String, Object> map) {
         mAdapterPresenter
                 .setDbRepository(DbFactory::getBook)
                 .setNetRepository(NetFactory::getBook)
                 .setParam(map)
-                .setBegin(C.NO_MORE-1)
+                .setNo_MORE(true)
                 .fetch();
     }
 }

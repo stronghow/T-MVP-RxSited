@@ -64,12 +64,10 @@ public class TabDialog extends DialogFragment {
                      .setOnItemClickListener(new BaseViewHolder.ItemClickListener() {
                          @Override
                          public void onItemClick(View view, int postion) {
-                             if(postion < tagsList.size()) {
                                  Tags item = tagsList.get(postion);
                                  if (TextUtils.isEmpty(item.group)) {
                                      OkBus.getInstance().onEvent(EventTags.CURRENT_ITEM, map.get(item.url));
-                                     if (dialog != null) dialog.dismiss();
-                                 }
+                                     dialog.dismiss();
                              }
                          }
                      });
@@ -78,7 +76,7 @@ public class TabDialog extends DialogFragment {
                      .setDbRepository(DbFactory::getTags)
                      .setParam(C.URL,mDialog.getArguments().getString(C.URL))
                      .fetch()
-                     .subscribe(tagses -> {
+                     .map(tagses -> {
                          tagsList = new ArrayList<>();
                          for(int i=0;i<tagses.size();i++){
                              Tags item = tagses.get(i);
@@ -94,10 +92,10 @@ public class TabDialog extends DialogFragment {
                                  map.put(item.url,i);
                              }
                          }
+                         return tagsList;
+                     }).subscribe(tagsList ->
                          tRecyclerView.getCoreAdapter()
-                                 .setBeans(tagsList, AdapterPresenter.NO_MORE);
-
-                     });
+                                      .setBeans(tagsList, AdapterPresenter.NO_MORE));
         dialog.setContentView(tRecyclerView);
         return dialog;
     }

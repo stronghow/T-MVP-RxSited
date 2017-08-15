@@ -7,11 +7,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 
+import com.aop.MethodCallAspect;
 import com.app.annotation.aspect.TimeLog;
 import com.base.util.SpUtil;
 import com.sited.RxSource;
 import com.socks.library.KLog;
-import com.squareup.leakcanary.RefWatcher;
 
 import java.util.Stack;
 
@@ -23,13 +23,15 @@ import okhttp3.OkHttpClient;
  */
 public class App extends Application {
     private static App mCurrent;
-    private static OkHttpClient mHttpClient;
+
     public static Stack<Activity> store;
-    private static RefWatcher refWatcher;
+    //private static RefWatcher refWatcher;
     @TimeLog
     public void onCreate() {
         super.onCreate();
         mCurrent = this;
+
+        //MethodCallAspect.setEnable(false);
 
         KLog.init(true,"RxSited_Log");
 
@@ -57,13 +59,6 @@ public class App extends Application {
         store = new Stack<>();
         registerActivityLifecycleCallbacks(new SwitchBackgroundCallbacks());
         //loadLeak();
-    }
-
-    public static OkHttpClient getHttpClient() {
-        if (mHttpClient == null) {
-            mHttpClient = new OkHttpClient();
-        }
-        return mHttpClient;
     }
 
 //    private  void loadLeak(){

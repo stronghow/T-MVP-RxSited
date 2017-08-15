@@ -26,7 +26,7 @@ import okhttp3.Response;
 
 public class HttpUtil {
 
-   public static String getHtml(final RxNode cfg, final String url)  {
+    public static String getHtml(final RxNode cfg, final String url)  {
         try {
             return loadHtml(new HttpMessage(cfg, url)).blockingFirst();
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class HttpUtil {
                     builder.get();
                 }
                 Request request = builder.build();
-                App.getHttpClient().newCall(request).enqueue(new Callback() {
+                RxSource.getHttpClient().newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
 

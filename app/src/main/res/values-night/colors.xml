@@ -5,8 +5,8 @@
     <color name="colorAccent">#00524a</color>
 
     <color name="backgroundCard">#757575</color>
-    <color name="textColorBg">#666666</color>
-    <color name="textColor">#444444</color>
+    <color name="textColorBg">#677f9d</color>
+    <color name="textColor">#cccccc</color>
     <color name="colorWhite">#cccccc</color>
 
 </resources>

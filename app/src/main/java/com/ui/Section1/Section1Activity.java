@@ -68,7 +68,6 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
 
 
     protected void onDestroy() {
-        KLog.json("onDestroy");
         super.onDestroy();
         //更新Sections
 

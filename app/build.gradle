@@ -3,7 +3,13 @@ import com.app.plugin.JavassistPlugin
 
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
-apply plugin: 'me.tatarka.retrolambda'
+//apply plugin: 'me.tatarka.retrolambda'
+
+//应用android-apt插件
+//apply plugin: 'android-apt'
+//apply plugin: 'com.neenbedankt.android-apt'
+//定义androidannotations框架的版本号
+//def AAVersion = '4.0.0'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -50,6 +56,7 @@ android {
     }
 
     lintOptions {
+        checkReleaseBuilds false
         abortOnError false
     }
     dexOptions {
@@ -65,6 +72,10 @@ ext {
 }
 
 dependencies {
+    //加入AndroidAnnotations依赖
+    //apt "org.androidannotations:androidannotations:$AAVersion"
+//    annotationProcessor "org.androidannotations:androidannotations:$AAVersion"
+//    compile "org.androidannotations:androidannotations-api:$AAVersion"
 //    compile project(':using')
 //    compile project(':sited')
     compile 'com.github.todou:appbarspring:1.0.3'
@@ -72,10 +83,10 @@ dependencies {
     //    compile "com.squareup.retrofit2:converter-gson:$retrofit_version"
     //    compile "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
     //    compile 'com.squareup.okhttp3:logging-interceptor:3.5.0'
-    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.google.code.gson:gson:2.8.0'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     //compile 'io.reactivex.rxjava2:rxjava:2.1.0'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.github.bumptech.glide:glide:3.8.0'
     compile 'org.aspectj:aspectjrt:1.8.9'
     compile "com.android.support:design:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:cardview-v7:$rootProject.ext.supportLibraryVersion"
@@ -85,9 +96,7 @@ dependencies {
     compile "com.android.support:percent:$rootProject.ext.supportLibraryVersion"
     //log
     compile 'com.github.zhaokaiqiang.klog:library:1.5.0'
-    //searchview
-//    compile 'com.github.arimorty:floatingsearchview:2.0.4'
-//    compile files('libs/Noear.Snacks.jar')
+
     compile project(':lib')
     compile 'com.eclipsesource.j2v8:j2v8:3.1.6@aar'
     //compile "com.eclipsesource.j2v8:j2v8:4.6.0@aar"
@@ -99,9 +108,9 @@ dependencies {
     //compile 'top.zibin:Luban:1.1.2'
 
     //内存检测
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+//    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+//    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+//    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
 
     annotationProcessor project(':apt')
 }

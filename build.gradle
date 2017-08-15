@@ -5,14 +5,17 @@ buildscript {
         maven{
             url uri('repo')
         }
+        google()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath 'me.tatarka:gradle-retrolambda:3.2.0'
+        classpath 'com.android.tools.build:gradle:3.0.0-beta1'
+        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
         classpath 'org.aspectj:aspectjtools:1.8.9'
         classpath 'com.app.plugin:gradleplugin:1.0.0'
-        classpath "io.realm:realm-gradle-plugin:3.4.0"
+        classpath 'io.realm:realm-gradle-plugin:3.4.0'
+        //配置android-apt插件
+        //classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         // classpath 'com.codingbingo.library:gradletaskrecord:1.0.0'//追踪Gradle 任务耗时
     }
 }
@@ -22,13 +25,13 @@ ext {
     applicationId = "com.RxSited"
     versionCode = 1
     versionName = "1.0"
-    compileSdkVersion = 25
+    compileSdkVersion = 26
     buildToolsVersion = "25.0.3"
     minSdkVersion = 19
-    targetSdkVersion = 25
+    targetSdkVersion = 26
     renderscriptTargetApi = 20
 
-    supportLibraryVersion = "25.3.1"
+    supportLibraryVersion = "26.0.1"
 }
 
 //apply plugin: 'com.codingbingo.gradletaskrecord'//追踪Gradle任务耗时的插件
@@ -36,6 +39,7 @@ ext {
 allprojects {
     repositories {
         jcenter()
+        google()
     }
 }
 

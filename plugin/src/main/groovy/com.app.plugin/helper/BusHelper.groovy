@@ -9,6 +9,7 @@ import javassist.bytecode.MethodInfo
 import javassist.bytecode.annotation.IntegerMemberValue
 
 import java.lang.annotation.Annotation
+import java.text.MessageFormat
 
 /**
  * Created by baixiaokang on 16/11/15.
@@ -23,7 +24,7 @@ public class BusHelper {
 
     static def Activity_OnCreate = "\n" +
             "    protected void onCreate(Bundle savedInstanceState) {\n" +
-            "        super.onCreate(savedInstanceState);\n";
+            "        super.onCreate(savedInstanceState);\n"
 
     static def Fragment_OnCreate = "public void onActivityCreated(Bundle savedInstanceState) {\n" +
             "        super.onActivityCreated(savedInstanceState);"
@@ -33,7 +34,7 @@ public class BusHelper {
 
     static def Pre_OnDestroy = "  \n" +
             "    protected void onDestroy() {\n" +
-            "        super.onDestroy();\n";
+            "        super.onDestroy();\n"
     /**
      * 处理BusInfo
      * @param mBusInfo
@@ -43,30 +44,30 @@ public class BusHelper {
         if (mBusInfo.clazz.isFrozen()) mBusInfo.clazz.defrost()//解冻
         if (mBusInfo.BusRegisterMethod != null) {//有被BusRegister注解的方法
             mBusInfo.project.logger.quiet "BusRegisterMethod not null" +
-            mBusInfo.BusRegisterMethod.insertAfter(getRegisterEventMethodStr(mBusInfo));
+            mBusInfo.BusRegisterMethod.insertAfter(getRegisterEventMethodStr(mBusInfo))
         } else if (mBusInfo.getOnCreateMethod() == null) {//没有OnCreateMethod，创建并加上新代码
             mBusInfo.project.logger.quiet "getOnCreateMethod  null "  + mBusInfo.isActivity
-            String pre_create_str = mBusInfo.isActivity ? Activity_OnCreate : Fragment_OnCreate;
+            String pre_create_str = mBusInfo.isActivity ? Activity_OnCreate : Fragment_OnCreate
             String m = pre_create_str + getRegisterEventMethodStr(mBusInfo) + "}"
             mBusInfo.project.logger.quiet m
-            CtMethod mInitEventMethod = CtNewMethod.make(m, mBusInfo.clazz);
+            CtMethod mInitEventMethod = CtNewMethod.make(m, mBusInfo.clazz)
             mBusInfo.clazz.addMethod(mInitEventMethod)
         } else {//有OnCreateMethod，直接插入新代码
             mBusInfo.project.logger.quiet "OnCreateMethod not null"
-            mBusInfo.OnCreateMethod.insertAfter(getRegisterEventMethodStr(mBusInfo));
+            mBusInfo.OnCreateMethod.insertAfter(getRegisterEventMethodStr(mBusInfo))
         }
         if (mBusInfo.BusUnRegisterMethod != null) {//有被BusUnRegister注解的方法
             mBusInfo.project.logger.quiet "BusUnRegisterMethod not null"
-            mBusInfo.BusUnRegisterMethod.insertAfter(getUnRegisterEventMethodStr(mBusInfo));
+            mBusInfo.BusUnRegisterMethod.insertAfter(getUnRegisterEventMethodStr(mBusInfo))
         } else if (mBusInfo.OnDestroyMethod == null) {
             mBusInfo.project.logger.quiet "OnDestroyMethod null"
-            String m = Pre_OnDestroy + getUnRegisterEventMethodStr(mBusInfo) + "}";
+            String m = Pre_OnDestroy + getUnRegisterEventMethodStr(mBusInfo) + "}"
             mBusInfo.project.logger.quiet m
             CtMethod destroyMethod = CtNewMethod.make(m, mBusInfo.clazz)
             mBusInfo.clazz.addMethod(destroyMethod)
         } else {
             mBusInfo.project.logger.quiet "OnDestroyMethod not null"
-            mBusInfo.OnDestroyMethod.insertAfter(getUnRegisterEventMethodStr(mBusInfo));
+            mBusInfo.OnDestroyMethod.insertAfter(getUnRegisterEventMethodStr(mBusInfo))
         }
 
         mBusInfo.clazz.writeFile(path)
@@ -78,24 +79,26 @@ public class BusHelper {
      * @return
      */
     static String getRegisterEventMethodStr(BusInfo mBusInfo) {
-        String CreateStr = "";
-        mBusInfo.clazz.addInterface(mBusInfo.clazz.classPool.get("com.base.event.Event"));//为当前的类添加时间处理的接口
+        String CreateStr = ""
+        mBusInfo.clazz.addInterface(mBusInfo.clazz.classPool.get("com.base.event.Event"))//为当前的类添加时间处理的接口
         for (int i = 0; i < mBusInfo.getMethods().size(); i++) {
-            MethodInfo methodInfo = mBusInfo.getMethods().get(i).getMethodInfo();
+            MethodInfo methodInfo = mBusInfo.getMethods().get(i).getMethodInfo()
             Annotation mAnnotation = mBusInfo.getAnnotations().get(i)
-            AnnotationsAttribute attribute = methodInfo.getAttribute(AnnotationsAttribute.visibleTag);
+            AnnotationsAttribute attribute = methodInfo.getAttribute(AnnotationsAttribute.visibleTag)
             //获取注解属性
-            javassist.bytecode.annotation.Annotation annotation = attribute.getAnnotation(mAnnotation.annotationType().canonicalName);
+            javassist.bytecode.annotation.Annotation annotation = attribute.getAnnotation(mAnnotation.annotationType().canonicalName)
             //获取注解
-            int id = ((IntegerMemberValue) annotation.getMemberValue("value")).getValue();//获取注解的值
-            int thread = -1;
+            int id = ((IntegerMemberValue) annotation.getMemberValue("value")).getValue()//获取注解的值
+            int thread = -1
             if (annotation.getMemberValue("thread") != null)
-                thread = ((IntegerMemberValue) annotation.getMemberValue("thread")).getValue();
+                thread = ((IntegerMemberValue) annotation.getMemberValue("thread")).getValue()
             mBusInfo.eventIds.add(id)
-            CreateStr += "OkBus.getInstance().register(" + id + ",(Event)this," + thread + ");\n"
+//            CreateStr += "OkBus.getInstance().register(" + id + ",(Event)this," + thread + ");\n"
+//            CreateStr += MessageFormat.format("OkBus.getInstance().register({0},(Event)this,{1});\n",id,thread)
+            CreateStr += "OkBus.getInstance().register($id,(Event)this,$thread);\n"
         }
         initEventDispatch(mBusInfo)
-        return CreateStr;
+        return CreateStr
     }
     /**
      * 生成event事件分发的逻辑代码
@@ -103,39 +106,54 @@ public class BusHelper {
      * @return
      */
     static initEventDispatch(BusInfo mBusInfo) {
-        String SwitchStr = Pre_Switch_Str;
+        String SwitchStr = Pre_Switch_Str
         for (int i = 0; i < mBusInfo.eventIds.size(); i++) {
             CtMethod method = mBusInfo.getMethods().get(i)
-            CtClass[] mParameterTypes = method.getParameterTypes();
+            CtClass[] mParameterTypes = method.getParameterTypes()
             assert mParameterTypes.length <= 1
             boolean one = mParameterTypes.length == 1
-            boolean isBaseType = false;
-            String packageName = "";
+            boolean isBaseType = false
+            String packageName = ""
             if (one) {
-                String mParameterType = mParameterTypes[0].name;
+                String mParameterType = mParameterTypes[0].name
                 switch (mParameterType) {
                 //Primitive Types（原始型）	Reference Types(Wrapper Class)（引用型，（包装类））
-                    case "boolean": mParameterType = "Boolean"; isBaseType = true; break;
-                    case "byte": mParameterType = "Byte"; isBaseType = true; break;
-                    case "char": mParameterType = "Character"; isBaseType = true; break;
-                    case "float": mParameterType = "Float"; isBaseType = true; break;
-                    case "int": mParameterType = "Integer"; isBaseType = true; break;
-                    case "long": mParameterType = "Long"; isBaseType = true; break;
-                    case "short": mParameterType = "Short"; isBaseType = true; break;
-                    case "double": mParameterType = "Double"; isBaseType = true; break;
+                    case "boolean": mParameterType = "Boolean"; isBaseType = true; break
+                    case "byte": mParameterType = "Byte"; isBaseType = true; break
+                    case "char": mParameterType = "Character"; isBaseType = true; break
+                    case "float": mParameterType = "Float"; isBaseType = true; break
+                    case "int": mParameterType = "Integer"; isBaseType = true; break
+                    case "long": mParameterType = "Long"; isBaseType = true; break
+                    case "short": mParameterType = "Short"; isBaseType = true; break
+                    case "double": mParameterType = "Double"; isBaseType = true; break
                 }
                 mBusInfo.project.logger.quiet "name:" + mParameterType
-                packageName = isBaseType ? "java.lang." + mParameterType : mParameterType;
+                packageName = isBaseType ? "java.lang." + mParameterType : mParameterType
                 mBusInfo.clazz.classPool.importPackage(packageName)
             }//如果是基本数据类型，需要手动拆箱，否则会报错
-            String ParamStr = isBaseType ? ("((" + packageName + ")msg.obj)." +
-                    mParameterTypes[0].name + "Value()") : ("(" + packageName + ")msg.obj");
-            SwitchStr += "case " + mBusInfo.eventIds.get(i) + ":" + method.getName() +
-                    "(" + (one ? ParamStr : "") + ");\n break;\n"
+//            String ParamStr = isBaseType ? ("((" + packageName + ")msg.obj)." +
+//                    mParameterTypes[0].name + "Value()") : ("(" + packageName + ")msg.obj")
+
+//            SwitchStr += "case " + mBusInfo.eventIds.get(i) + ":" + method.getName() +
+//                    "(" + (one ? ParamStr : "") + ");\n break;\n"
+
+//            String ParamStr = isBaseType ? MessageFormat.format("(({0})msg.obj).{1}Value()",packageName,mParameterTypes[0].name)
+//                                          : MessageFormat.format("({0})msg.obj",packageName)
+
+//            SwitchStr += MessageFormat.format("case {0}:{1}({2} ? {3} : \"\");\n break;\n"
+//                    ,mBusInfo.eventIds.get(i)
+//                    ,method.getName()
+//                    ,one
+//                    ,ParamStr
+//            )
+            String ParamStr = isBaseType ?  "(($packageName)msg.obj).${mParameterTypes[0].name}Value()"
+                                          : "($packageName)msg.obj"
+
+            SwitchStr += "case ${mBusInfo.eventIds.get(i)}:${method.getName()}($one ? $ParamStr : \"\");\n break;\n"
         }
         String m = SwitchStr + "}\n}"
         mBusInfo.project.logger.quiet m
-        CtMethod mDispatchEventMethod = CtMethod.make(m, mBusInfo.clazz);
+        CtMethod mDispatchEventMethod = CtMethod.make(m, mBusInfo.clazz)
         mBusInfo.clazz.addMethod(mDispatchEventMethod)
     }
     /**
@@ -143,8 +161,13 @@ public class BusHelper {
      * @param mBusInfo
      */
     static String getUnRegisterEventMethodStr(mBusInfo) {
-        String dis_Str = "";
-        mBusInfo.eventIds.each { id -> dis_Str += "OkBus.getInstance().unRegister(" + id + ");\n" }
-        return dis_Str;
+//        String dis_Str = ""
+//        mBusInfo.eventIds.each { id -> dis_Str += "OkBus.getInstance().unRegister(" + id + ");\n" }
+//        return dis_Str
+
+        StringBuilder dis_Sb = new StringBuilder()
+        mBusInfo.eventIds.each { id -> dis_Sb.append("OkBus.getInstance().unRegister($id);\n") }
+        return dis_Sb.toString()
+
     }
 }

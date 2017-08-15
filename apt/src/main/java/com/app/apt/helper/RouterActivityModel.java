@@ -8,7 +8,6 @@ import javax.lang.model.element.TypeElement;
 /**
  * Created by baixiaokang on 16/12/30.
  */
-
 public class RouterActivityModel {
     boolean isNeedBind;//是否需要对目标类进行数据绑定，只有有传参数的和有转场需要初始化数据绑定
     TypeElement element;//当前的Activity

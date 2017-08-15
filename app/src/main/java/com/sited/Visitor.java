@@ -20,103 +20,105 @@ public class Visitor extends VisitorSupport {
 
     @Override
     public void visit(Element node) {
-            switch (node.getName()){
-                case "site":
-                    source.engine = Integer.valueOf(node.attribute("engine").getValue());
-                    break;
-                case "ua":
-                    source.ua = node.getTextTrim();
-                    break;
-                case "main":
-                    source.dtype = Integer.valueOf(node.attribute("dtype").getValue());
-                    break;
-                case "encode":
-                    source.encode = node.getTextTrim();
-                    break;
-                case "expr":
-                    source.expr = node.getTextTrim();
-                    break;
-                case "title":
-                    source.title = node.getTextTrim();
-                    break;
-                case "url":
-                    source.url = node.getTextTrim();
-                    break;
-                case "code":
-                    source.code = node.getTextTrim();
-                    break;
-                case "require":
-                    source.require = new ArrayList<>();
-                    for(Element item : node.elements()){
-                        source.require.add(new Lib(item.attributeValue("url"),item.attributeValue("lib")));
+        switch (node.getName()){
+            case "site":
+                source.engine = Integer.valueOf(node.attribute("engine").getValue());
+                break;
+            case "ua":
+                source.ua = node.getTextTrim();
+                break;
+            case "main":
+                source.dtype = Integer.valueOf(node.attribute("dtype").getValue());
+                break;
+            case "encode":
+                source.encode = node.getTextTrim();
+                break;
+            case "expr":
+                source.expr = node.getTextTrim();
+                break;
+            case "title":
+                source.title = node.getTextTrim();
+                break;
+            case "url":
+                source.url = node.getTextTrim();
+                break;
+            case "code":
+                source.code = node.getTextTrim();
+                break;
+            case "require":
+                source.require = new ArrayList<>();
+                for(Element item : node.elements()){
+                    source.require.add(new Lib(item.attributeValue("url"),item.attributeValue("lib")));
+                }
+                break;
+            case "search":
+                source.search = new RxNode(source);
+                for(Attribute attribute : node.attributes())
+                    source.search.attrs.set(attribute.getName(),attribute.getValue());
+                source.search.build();
+                break;
+            case "hots":
+                source.hots = new RxNode(source);
+                for(Attribute attribute : node.attributes())
+                    source.hots.attrs.set(attribute.getName(),attribute.getValue());
+                source.hots.build();
+                break;
+            case "updates":
+                source.updates = new RxNode(source);
+                for(Attribute attribute : node.attributes())
+                    source.updates.attrs.set(attribute.getName(),attribute.getValue());
+                source.updates.build();
+                break;
+            case "tags":
+                source.tags = new RxNode(source);
+                for(Attribute attribute : node.attributes())
+                    source.tags.attrs.set(attribute.getName(),attribute.getValue());
+                if(node.elements().size()>0) {
+                    StringBuilder sb = new StringBuilder("[");
+                    for (Element item : node.elements()) {
+                        sb.append("{");
+                        for (Attribute attr : item.attributes()) {
+                          sb.append("\"").append(attr.getName()).append("\":\"").append(attr.getValue()).append("\",");
+                        }
+                        sb.deleteCharAt(sb.length() - 1);
+                        sb.append("},");
                     }
-                    break;
-                case "search":
-                    source.search = new RxNode();
-                    for(Attribute attribute : node.attributes())
-                        source.search.attrs.set(attribute.getName(),attribute.getValue());
-                    source.search.build(source);
-                    break;
-                case "hots":
-                    source.hots = new RxNode();
-                    for(Attribute attribute : node.attributes())
-                        source.hots.attrs.set(attribute.getName(),attribute.getValue());
-                    source.hots.build(source);
-                case "updates":
-                    source.updates = new RxNode();
-                    for(Attribute attribute : node.attributes())
-                        source.updates.attrs.set(attribute.getName(),attribute.getValue());
-                    source.updates.build(source);
-                case "tags":
-                      source.tags = new RxNode();
-                      Element tags = node;
-                      for(Attribute attribute : tags.attributes())
-                          source.tags.attrs.set(attribute.getName(),attribute.getValue());
-                      if(tags.elements().size()>0) {
-                          StringBuilder sb = new StringBuilder("[");
-                          for (Element item : tags.elements()) {
-                              sb.append("{");
-                              for (Attribute attr : item.attributes()) {
-                                  sb.append("\"").append(attr.getName()).append("\":\"").append(attr.getValue()).append("\",");
-                              }
-                              sb.deleteCharAt(sb.length() - 1);
-                              sb.append("},");
-                          }
-                          sb.deleteCharAt(sb.length() - 1);
-                          sb.append("]");
-                          source.tags.staticData = sb.toString();
-                          KLog.json("Tags = " + source.tags.staticData);
-                      }
-                      source.tags.build(source);
-                      break;
-                  case "tag":
-                      source.tag = new RxNode();
-                      for(Attribute attribute : node.attributes())
-                          source.tag.attrs.set(attribute.getName(),attribute.getValue());
-                      source.tag.build(source);
-                      break;
-                  case "book":
-                      if(source.book == null) {
-                          source.book = new RxNode();
-                          Element book = node;
-
-                          for (Attribute attribute : book.attributes())
-                              source.book.attrs.set(attribute.getName(), attribute.getValue());
-
-                          source.book.build(source);
-                      }
-                      break;
-                  case "sections":
-                      if (source.sections == null) {
-                          source.sections = new RxNode();
-                          for (Attribute attr : node.attributes())
-                              source.sections.attrs.set(attr.getName(), attr.getValue());
-                          source.sections.build(source);
-                      }
-                  case "section":
-                      if(source.section == null)
-                        source.section  = RxNodeSet.getInstance().build(node,source);
-                      break;
-        }
+                    sb.deleteCharAt(sb.length() - 1);
+                    sb.append("]");
+                    source.tags.staticData = sb.toString();
+                    KLog.json("Tags = " + source.tags.staticData);
+                }
+                source.tags.build();
+                break;
+            case "tag":
+                source.tag = new RxNode(source);
+                for(Attribute attribute : node.attributes())
+                    source.tag.attrs.set(attribute.getName(),attribute.getValue());
+                source.tag.build();
+                break;
+            case "book":
+                if(source.book == null) {
+                    source.book = new RxNode(source);
+                    for (Attribute attribute : node.attributes())
+                        source.book.attrs.set(attribute.getName(), attribute.getValue());
+                    source.book.build();
+                }
+                break;
+            case "sections":
+                if (source.sections == null) {
+                    source.sections = new RxNode(source);
+                    for (Attribute attr : node.attributes())
+                        source.sections.attrs.set(attr.getName(), attr.getValue());
+                    source.sections.build();
+                }
+                break;
+            case "section":
+                if(source.section == null)
+                source.section  = RxNodeSet.getInstance()
+                        .setRxSource(source)
+                        .setNode(node)
+                        .build();
+                break;
+            }
     }
 }
