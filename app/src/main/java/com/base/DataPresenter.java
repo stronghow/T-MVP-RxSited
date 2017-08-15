@@ -28,6 +28,15 @@ public class DataPresenter<T extends RealmObject> {
     //    private boolean isCACHE_NETWORK; //缓存和网络一起
 //    private Disposable mDbSubscription;
 //    private Disposable mNetSubscription;
+    private DataFromListener dataFromListener;
+
+    public interface DataFromListener{
+       void Call(boolean isFromNet);
+    }
+
+    public void setDataFromListener(DataFromListener dataFromListener){
+        this.dataFromListener = dataFromListener;
+    }
 
     private DataPresenter(){}
 
@@ -71,9 +80,12 @@ public class DataPresenter<T extends RealmObject> {
 
     private Flowable<List<T>> getNetDataT(){
         KLog.json("fromNet");
-        if(NetWorkUtil.isNetConnected(App.getContext()) && mNetRepository != null)
+        if(NetWorkUtil.isNetConnected(App.getContext()) && mNetRepository != null) {
+            if(dataFromListener != null)
+                dataFromListener.Call(true);
             return mNetRepository.getData(param)
                     .compose(RxSchedulers.io_main());
+        }
         else {
             ToastUtil.show("请连接网络");
             return Observable_NULL();
@@ -87,6 +99,8 @@ public class DataPresenter<T extends RealmObject> {
                     .flatMap(ts -> {
                         if (ts != null && ts.size() > 0) {
                             KLog.json("fromDb");
+                            if (dataFromListener != null)
+                                dataFromListener.Call(false);
                             return Flowable.just(ts).compose(RxSchedulers.io_main());
                         }
 
