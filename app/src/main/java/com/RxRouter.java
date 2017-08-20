@@ -52,10 +52,10 @@ public class RxRouter {
             String Html = HttpUtil.getHtml(webUrl);
             RxSource sd = RxSourceApi.getRxSource(Html);
             if(sd == null) return;
-            if(sd.tags == null) {
-                ToastUtil.show("对不起,暂时不支持无Tags节点的插件:)");
-                return;
-            }
+//            if(sd.tags == null) {
+//                ToastUtil.show("对不起,暂时不支持无Tags节点的插件:)");
+//                return;
+//            }
             SourceModel model = new SourceModel();
             model.expr = sd.expr;
             model.sited = Html;

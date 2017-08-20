@@ -3,27 +3,22 @@ package com;
 import android.text.TextUtils;
 
 import com.base.DataFactory;
-import com.base.util.helper.RxSchedulers;
 import com.dao.db.SiteDbApi;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.model.BookModel;
-import com.model.PicModel;
+import com.model.dtype1;
 import com.model.Sections;
 import com.model.Tag;
 import com.model.Tags;
+import com.sited.RxNode;
 import com.sited.RxSource;
 import com.socks.library.KLog;
-import com.ui.Section1.Section1Activity;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Flowable;
-import io.reactivex.schedulers.Schedulers;
 
 import static com.base.DataFactory.JsonToList;
 
@@ -42,13 +37,11 @@ public class NetFactory {
         final RxSource rxSource = (RxSource)param.get(C.SOURCE);
         return rxSource.parseTags(url)
                     .map(s -> {
-                        KLog.json("RxThread ->" + Thread.currentThread().getName());
-                        return JsonToList(s,Tags.class);
+                        List<Tags> tagslist = DataFactory.JsonToList(s,Tags.class);
+                        for(Tags tags : (List<Tags>)tagslist) tags.QueryKey = url;
+                        return tagslist;
                     })
-                    .doOnNext(tagses -> {
-                        for (Tags tags : tagses) tags.QueryKey = url;
-                        SiteDbApi.insertOrUpdate(tagses);
-                    });
+                    .doOnNext(SiteDbApi::insertOrUpdate);
 
     }
 
@@ -58,15 +51,12 @@ public class NetFactory {
         final RxSource rxSource = (RxSource)param.get(C.SOURCE);
         return rxSource.parseTag(_tags.url,page)
                 .map(s ->{
-                      KLog.json("RxThread ->" + Thread.currentThread().getName());
-                      return JsonToList(s,Tag.class);
-                })
-                .doOnNext(tags -> {
-                    KLog.json("RxThread ->" + Thread.currentThread().getName());
+                    List<Tag> taglist = DataFactory.JsonToList(s,Tag.class);
                     final String key = _tags.url + page;
-                    for(Tag tag : tags) tag.QueryKey = key;
-                    SiteDbApi.insertOrUpdate(tags);
-                });
+                    for(Tag tag : taglist) tag.QueryKey = key;
+                    return taglist;
+                })
+                .doOnNext(SiteDbApi::insertOrUpdate);
 
     }
 
@@ -86,63 +76,83 @@ public class NetFactory {
 
     public static Flowable<List<Sections>> getBook(HashMap<String, Object> param){
         final Tag tag = (Tag)param.get(C.MODEL);
-            //sited::获取book节点的数据
         final RxSource rxSource = (RxSource)param.get(C.SOURCE);
 
-        return rxSource.parseSections(tag.url)
+        return rxSource.parseBook(tag.url)
                         .map(s ->{
                             List<Sections> sectionsList = DataFactory.JsonToBean(s,BookModel.class).sections;
-                            getBookBy(sectionsList,tag); //维持正序
+                            getBookBy(sectionsList,tag.url); //维持正序
                             return sectionsList;
                         }).doOnNext(SiteDbApi::insertOrUpdate);
     }
 
 
-    public static Flowable<List<PicModel>> getSection(HashMap<String, Object> param){
+    public static Flowable<List> getSection(HashMap<String, Object> param){
+        final RxSource rxSource = (RxSource) param.get(C.SOURCE);
         Sections sections = (Sections) param.get(C.MODEL);
-        final RxSource rxSource = (RxSource)param.get(C.SOURCE);
-        List<Sections> sectionsList = (ArrayList<Sections>) param.get(C.SECTIONS);
-        final int index = sections.index;
-        int page = (int)param.get(C.PAGE) -1;
-        if(index + page == sectionsList.size()) { //已经到最底
-            KLog.json("已经到最底部");
-            return Observable_NULL();
-        }
-
-        sections = sectionsList.get(index + page);
-        while (TextUtils.isEmpty(sections.url)){ //跳过分组标题
-            page++;
-            if(index + page == sectionsList.size()) { //已经到最底部
+        SitedManage.databind databind = (SitedManage.databind) param.get(C.DATABIND);
+        if(databind.isGoBook) {
+            final int index = (int) param.get(C.INDEX);
+            List<Sections> sectionsList = (ArrayList<Sections>) param.get(C.SECTIONS);
+            int page = (int) param.get(C.PAGE) - 1;
+            if (index + page == sectionsList.size()) { //已经到最底
                 KLog.json("已经到最底部");
                 return Observable_NULL();
             }
+
             sections = sectionsList.get(index + page);
+            while (TextUtils.isEmpty(sections.url)) { //跳过分组标题
+                page++;
+                if (index + page == sectionsList.size()) { //已经到最底部
+                    KLog.json("已经到最底部");
+                    return Observable_NULL();
+                }
+                sections = sectionsList.get(index + page);
+            }
+            final String key = sections.url;
+
+            return rxSource.parseSection(sections.url)
+                    .map(s -> {
+//                        KLog.json(s);
+//                        KLog.json("RxThread ->" + Thread.currentThread().getName());
+//                        List<dtype1> dtype1s = new ArrayList<>();
+//                        final JsonElement element = new JsonParser().parse(s);
+//                        //JsonArray jsonArray = element.getAsJsonArray(); //TextUtils.isEmpty(jsonArray.get(0).getAsJsonObject().get("url").getAsString())
+//                        if(element.isJsonArray()) {
+//                            for (JsonElement el : element.getAsJsonArray()) {
+//                                final dtype1 dtype1 = new dtype1();
+//                                dtype1.url = el.getAsString();
+//                                dtype1.QueryKey = key;
+//                                dtype1s.add(dtype1);
+//                            }
+//                        }
+//                        else dtype1s = DataFactory.JsonToList(s,dtype1.class);
+//                        return dtype1s;
+                        return SitedManage.toList(s,databind.dtype,key);
+                    }).doOnNext(SiteDbApi::insertOrUpdate);
+        }else {
+            final String key = sections.url;
+
+            return rxSource.parseBook(sections.url)
+                    .map(s -> {
+//                        KLog.json(s);
+//                        KLog.json("RxThread ->" + Thread.currentThread().getName());
+//                        List<dtype1> dtype1s = new ArrayList<>();
+//                        final JsonElement element = new JsonParser().parse(s);
+//                        //JsonArray jsonArray = element.getAsJsonArray(); //TextUtils.isEmpty(jsonArray.get(0).getAsJsonObject().get("url").getAsString())
+//                        if(element.isJsonArray()) {
+//                            for (JsonElement el : element.getAsJsonArray()) {
+//                                final dtype1 dtype1 = new dtype1();
+//                                dtype1.url = el.getAsString();
+//                                dtype1.QueryKey = key;
+//                                dtype1s.add(dtype1);
+//                            }
+//                        }
+//                        else dtype1s = DataFactory.JsonToList(s,dtype1.class);
+//                        return dtype1s;
+                        return SitedManage.toList(s,databind.dtype,key);
+                    }).doOnNext(SiteDbApi::insertOrUpdate);
         }
-
-        final String key = sections.url;
-
-        return rxSource.parseSection(sections.url)
-                .map(s -> {
-                    KLog.json(s);
-                    KLog.json("RxThread ->" + Thread.currentThread().getName());
-                    List<PicModel> picModels = new ArrayList<>();
-                    final JsonElement element = new JsonParser().parse(s);
-                    //JsonArray jsonArray = element.getAsJsonArray(); //TextUtils.isEmpty(jsonArray.get(0).getAsJsonObject().get("url").getAsString())
-                    if(element.isJsonArray()) {
-                        for (JsonElement el : element.getAsJsonArray()) {
-                            final PicModel picModel = new PicModel();
-                            picModel.url = el.getAsString();
-                            picModel.QueryKey = key;
-                            picModels.add(picModel);
-                        }
-                    }
-                    else picModels = DataFactory.JsonToList(s,PicModel.class);
-                    return picModels;
-                }).doOnNext(picModels -> {
-                    KLog.json("RxThread ->" + Thread.currentThread().getName());
-                    SiteDbApi.insertOrUpdate(picModels);
-                });
-
     }
 
     /**
@@ -150,7 +160,7 @@ public class NetFactory {
      * @param
      * @return void
      */
-    private static void getBookBy(List<Sections> sectionses,Tag model){
+    private static void getBookBy(List<Sections> sectionses,String QueryKey){
         if (sectionses.size() > 1) { //大于一条数据
             final int cent = (sectionses.size()-1) / 2;
             // 大于0 反序 调换List
@@ -159,20 +169,13 @@ public class NetFactory {
             }
         }
         for(int i=0; i< sectionses.size();i++){
-            sectionses.get(i).index = i;
-            sectionses.get(i).QueryKey = model.url;
+            //sectionses.get(i).index = i;
+            sectionses.get(i).QueryKey = QueryKey;
         }
     }
 
-    public static void reverse(List<Sections> sectionses){
-        Collections.reverse(sectionses);
-        for(int i=0; i< sectionses.size();i++){
-            sectionses.get(i).index = i;
-        }
-    }
-
-    private static <M> Flowable<List<M>> Observable_NULL(){
-        return Flowable.just(new ArrayList<M>(0));
+    private static Flowable<List> Observable_NULL(){
+        return Flowable.just(new ArrayList<>(0));
     }
 }
 

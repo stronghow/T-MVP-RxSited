@@ -12,6 +12,7 @@ import com.C;
 import com.EventTags;
 import com.app.annotation.apt.Extra;
 import com.app.annotation.apt.Router;
+import com.app.annotation.javassist.Bus;
 import com.base.BaseActivity;
 import com.base.entity.DataExtra;
 import com.base.event.OkBus;
@@ -30,6 +31,9 @@ import java.util.List;
 
 @Router(C.SECTION1)
 public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySitedSectionBinding> implements Section1Contract.View {
+    @Extra(C.INDEX)
+    public int index;
+
     @Extra(C.MODEL)
     public Sections model;
 
@@ -55,8 +59,9 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
     @Override
     public void initView() {
         mViewBinding.listItem.getTextView().setVisibility(View.VISIBLE);
-        mViewBinding.listItem.setHashMap(C.BOOKNAME,model.name);
-        mPresenter.initAdapterPresenter(mViewBinding.listItem.getPresenter(), DataExtra.create()
+        setBookname(model.name);
+        mPresenter.initAdapterPresenter(mViewBinding.listItem, DataExtra.create()
+                .add(C.INDEX,index)
                 .add(C.MODEL,model)
                 .add(C.SOURCE,rxSource)
                 .add(C.SECTIONS,sectionsList)
@@ -77,11 +82,16 @@ public class Section1Activity extends BaseActivity<Section1Presenter,ActivitySit
 
     protected void onDestroy() {
         super.onDestroy();
-        //更新Sections
-        OkBus.getInstance().onEvent(EventTags.SECTION_PAGE,mViewBinding.listItem.getPresenter().getBegin()-1);
-            unregisterReceiver(batteryReceiver);
+        if(sectionsList.size() > 0)
+            OkBus.getInstance().onEvent(EventTags.SECTION_PAGE,mViewBinding.listItem.getPresenter().getPage()-1);
+        unregisterReceiver(batteryReceiver);
         if(mViewBinding.listItem.getPresenter()!=null)
             mViewBinding.listItem.getPresenter().unsubscribe();
+    }
+
+    @Bus(EventTags.SET_BOOKNAME)
+    public void setBookname(String bookname){
+        mViewBinding.listItem.setHashMap(C.BOOKNAME,bookname);
     }
 
     /**

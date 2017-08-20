@@ -1,5 +1,7 @@
 package com.sited;
 
+import android.text.TextUtils;
+
 import com.socks.library.KLog;
 
 import org.dom4j.Attribute;
@@ -8,6 +10,7 @@ import org.dom4j.VisitorSupport;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by haozhong on 2017/5/20.
@@ -26,13 +29,13 @@ public class Visitor extends VisitorSupport {
                 source.engine = Integer.valueOf(node.attribute("engine").getValue());
                 break;
             case "ua":
-                source.ua = node.getTextTrim();
+                source.ua = RxNodeHelp.getString(node.getTextTrim(),RxSource.defUA);
                 break;
             case "main":
                 source.dtype = Integer.valueOf(node.attribute("dtype").getValue());
                 break;
             case "encode":
-                source.encode = node.getTextTrim();
+                source.encode = RxNodeHelp.getString(node.getTextTrim(),RxSource.defEncode);
                 break;
             case "expr":
                 source.expr = node.getTextTrim();
@@ -53,30 +56,20 @@ public class Visitor extends VisitorSupport {
                 }
                 break;
             case "search":
-                source.search = new RxNode(source);
-                for(Attribute attribute : node.attributes())
-                    source.search.attrs.set(attribute.getName(),attribute.getValue());
-                source.search.build();
+                source.search = RxNodeHelp.buildNode(source,node);
                 break;
             case "hots":
-                source.hots = new RxNode(source);
-                for(Attribute attribute : node.attributes())
-                    source.hots.attrs.set(attribute.getName(),attribute.getValue());
-                source.hots.build();
+                source.hots = RxNodeHelp.buildNode(source,node);
                 break;
             case "updates":
-                source.updates = new RxNode(source);
-                for(Attribute attribute : node.attributes())
-                    source.updates.attrs.set(attribute.getName(),attribute.getValue());
-                source.updates.build();
+                source.updates = RxNodeHelp.buildNode(source,node);
                 break;
             case "tags":
                 if(source.tags == null) {
-                    source.tags = new RxNode(source);
-                    for (Attribute attribute : node.attributes())
-                        source.tags.attrs.set(attribute.getName(), attribute.getValue());
+                    source.tags = RxNodeHelp.buildNode(source,node,"tags");
+
                     List<Element> items = node.elements("item");
-                    if (items.size() > 0) {
+                    if (items != null && items.size() > 0) {
                         StringBuilder sb = new StringBuilder("[");
                         for (Element item : items) {
                             sb.append("{");
@@ -91,12 +84,6 @@ public class Visitor extends VisitorSupport {
                         source.tags.staticData = sb.toString();
                         KLog.json("Tags = " + source.tags.staticData);
                     }
-                    Element tags = node.element("tags");
-                    if(tags != null) {
-                        for (Attribute attribute : node.element("tags").attributes())
-                            source.tags.attrs.set(attribute.getName(), attribute.getValue());
-                    }
-                    source.tags.build();
                 }
                 break;
             case "tag":
@@ -108,26 +95,18 @@ public class Visitor extends VisitorSupport {
                 break;
             case "book":
                 if(source.book == null) {
-                    source.book = new RxNode(source);
-                    for (Attribute attribute : node.attributes())
-                        source.book.attrs.set(attribute.getName(), attribute.getValue());
-                    source.book.build();
-                }
-                break;
-            case "sections":
-                if (source.sections == null) {
-                    source.sections = new RxNode(source);
-                    for (Attribute attr : node.attributes())
-                        source.sections.attrs.set(attr.getName(), attr.getValue());
-                    source.sections.build();
+                    source.book = RxNodeSet.getInstance()
+                            .setRxSource(source)
+                            .setNode(node)
+                            .build("sections");
                 }
                 break;
             case "section":
                 if(source.section == null)
-                source.section  = RxNodeSet.getInstance()
-                        .setRxSource(source)
-                        .setNode(node)
-                        .build();
+                    source.section  = RxNodeSet.getInstance()
+                            .setRxSource(source)
+                            .setNode(node)
+                            .build();
                 break;
             }
     }

@@ -9,10 +9,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-beta1'
+        classpath 'com.android.tools.build:gradle:3.0.0-beta2'
         classpath 'me.tatarka:gradle-retrolambda:3.6.0'
         classpath 'org.aspectj:aspectjtools:1.8.9'
         classpath 'com.app.plugin:gradleplugin:1.0.0'
+        //classpath 'com.hujiang.aspectjx:gradle-android-plugin-aspectjx:1.0.10'
         classpath 'io.realm:realm-gradle-plugin:3.4.0'
         //配置android-apt插件
         //classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'

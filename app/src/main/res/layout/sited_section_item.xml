@@ -3,7 +3,7 @@
     <data>
         <variable
             name="item"
-            type="com.model.PicModel" />
+            type="com.model.dtype1" />
     </data>
         <ImageView
             android:id="@+id/image"

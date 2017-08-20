@@ -34,7 +34,11 @@ public class C {
 
     public static final String MODEL = "model";
 
+    public static final String DATABIND = "databind";
+
     public static final String URL = "url";
+
+    public static final String INDEX = "index";
 
     public static final String REFURL = "refurl";
 

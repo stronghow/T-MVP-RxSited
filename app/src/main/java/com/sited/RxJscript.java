@@ -13,9 +13,10 @@ import java.util.List;
 
 public class RxJscript {
     private static final String cheerio = Utils.getFileString(R.raw.cheerio);
-
+    private static final String Json_Concat = "function Json_Concat(str1,str2){return JSON.stringify(JSON.parse(str1).concat(JSON.parse(str2)))}";
     public static void load(JsEngine js, String code, List<Lib> require){
         js.loadJs(code); //fun
+        js.loadJs(Json_Concat);
         if(require != null && require.size()>0) {  //lib
             for (Lib lib : require) {
                 if (!loadLib(js, lib.lib))

@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.socks.library.KLog;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,9 +25,10 @@ import okhttp3.OkHttpClient;
  */
 public class RxSource {
     private static Application context;
-    private static OkHttpClient mHttpClient;
+    private static OkHttpClient mHttpClient = new OkHttpClient();
     private static HashMap<String,RxSource> rxSourceMap = new HashMap<>();
     public static final String defUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240";
+    public static final String defEncode = "UTF-8";
     public static final String CALL = "CALL::";
 
     public int engine;
@@ -44,8 +46,7 @@ public class RxSource {
     public RxNode tags;
     public RxNode search;
     public RxNodeSet tag;
-    public RxNode book;
-    public RxNode sections;
+    public RxNodeSet book;
     public RxNodeSet section;
     public List<Lib> require;
 
@@ -54,15 +55,9 @@ public class RxSource {
 
     public static void init(Application app){
         context = app;
-        if (mHttpClient == null) {
-            mHttpClient = new OkHttpClient();
-        }
     }
 
     public static OkHttpClient getHttpClient() {
-        if (mHttpClient == null) {
-            mHttpClient = new OkHttpClient();
-        }
         return mHttpClient;
     }
 
@@ -82,7 +77,6 @@ public class RxSource {
 
     public RxSource(){
         jsEngine = new JsEngine();
-        //set(this);
     }
 
     //预加载 js
@@ -94,8 +88,8 @@ public class RxSource {
         return jsEngine.callJs(func, args).blockingFirst();
     }
 
-    public String getUa() {
-        return !TextUtils.isEmpty(ua) ? ua:defUA;
+    private String Json_Concat(String str1,String str2){
+        return jsEngine.callJs("Json_Concat",str1,str2).blockingFirst();
     }
 
     //book section
@@ -112,12 +106,9 @@ public class RxSource {
         String u1 = TextUtils.isEmpty(cfg.url) ? defUrl:cfg.url;
         page += cfg.addPage;
         if (!TextUtils.isEmpty(cfg.buildUrl)) {
-            KLog.json(cfg.buildUrl);
             return callJs(cfg.buildUrl, u1, page+"");
         }
-        KLog.json(cfg.buildUrl);
         u1 = u1.replace("@page", page + "");
-        KLog.json("getUrl = " + u1);
         return u1;
     }
 
@@ -133,9 +124,6 @@ public class RxSource {
     }
 
     private Flowable<String> rxParse(RxNode cfg,String url, String html) {
-        KLog.json("rxParse-url", url);
-        KLog.json("rxParse-html", html == null ? "null" : html);
-        KLog.json("rxParse-parse",cfg.parse);
         if (TextUtils.isEmpty(cfg.parse) || "@null".equals(cfg.parse)) {
             if (TextUtils.isEmpty(html)) {
                 html = "[]";
@@ -165,16 +153,19 @@ public class RxSource {
 
     public Flowable<String> parseTags(String url){
         parseHots(url).subscribe();
-        //parseUpdates(url).subscribe();
+        parseUpdates(url).subscribe();
         if(tags == null) return Flowable.just("[]");
-        else return doGetNodeViewModel(tags,url)
-                .map(s -> {
-                    if(s.equals("[]") && tags.staticData != null) return tags.staticData;
-                    if(!s.equals("[]") && tags.staticData != null)
-                        // [{0}] [{1}] => [{0},{1}]
-                        return tags.staticData.replace("]",",") + s.replace("[","");
-                    else return s;
-                });
+        if(tags.canParse()) {
+            String ul = getUrl(tags,url);
+            return doGetNodeViewModel(tags, ul)
+                    .map(s -> {
+                        String json = Json_Concat(s, tags.staticData);
+                        KLog.json("tags ==> " + json);
+                        return json;
+                    });
+        } else{
+            return Flowable.just(tags.staticData);
+        }
     }
 
     public Flowable<String> parseTag(String url,int page){
@@ -187,15 +178,10 @@ public class RxSource {
 
     public Flowable<String> parseBook(String url){
         if(book == null) return Flowable.just("[]");
-        String ul = getUrl(book,url);
-        return doGetNodeViewModel(book,ul);
-    }
-
-    public Flowable<String> parseSections(String url){
-        if(sections == null)
-            return parseBook(url);
-        String ul = getUrl(sections,url);
-        return doGetNodeViewModel(sections,ul);
+        RxNode item = book.nodeMatch(url);
+        if(item == null) return Flowable.just("[]");
+        String ul = getUrl(item,url);
+        return doGetNodeViewModel(item,ul);
     }
 
     public Flowable<String> parseSection(String url){
@@ -204,6 +190,18 @@ public class RxSource {
         if(item == null) return Flowable.just("[]");
         String ul = getUrl(item,url);
         return doGetNodeViewModel(item,ul);
+    }
+
+    public RxNode getBook(String url){
+        if(book == null) return null;
+        RxNode item = book.nodeMatch(url);
+        return item;
+    }
+
+    public RxNode getSection(String url){
+        if(section == null) return null;
+        RxNode item = section.nodeMatch(url);
+        return item;
     }
 
     private Flowable<String> doGetNodeViewModel(@NonNull final RxNode cfg,@NonNull final String url) {
@@ -225,7 +223,7 @@ public class RxSource {
                     String[] urls = parseUrl.split(";");
                     KLog.json(" urls.length = " + urls.length);
                     for (String u1 : urls) {
-                        Thread.sleep(200);
+                        //Thread.sleep(200);
                         e.onNext(HttpUtil.getHtml(cfg, u1));
                     }
                 } else {
@@ -253,7 +251,6 @@ public class RxSource {
                 ", search=" + search +
                 ", tag=" + tag +
                 ", book=" + book +
-                ", sections=" + sections +
                 ", section=" + section +
                 ", require='" + require + '\'' +
                 '}';

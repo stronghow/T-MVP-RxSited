@@ -133,7 +133,7 @@ public class BusHelper {
             }//如果是基本数据类型，需要手动拆箱，否则会报错
 //            String ParamStr = isBaseType ? ("((" + packageName + ")msg.obj)." +
 //                    mParameterTypes[0].name + "Value()") : ("(" + packageName + ")msg.obj")
-
+//
 //            SwitchStr += "case " + mBusInfo.eventIds.get(i) + ":" + method.getName() +
 //                    "(" + (one ? ParamStr : "") + ");\n break;\n"
 
@@ -149,7 +149,7 @@ public class BusHelper {
             String ParamStr = isBaseType ?  "(($packageName)msg.obj).${mParameterTypes[0].name}Value()"
                                           : "($packageName)msg.obj"
 
-            SwitchStr += "case ${mBusInfo.eventIds.get(i)}:${method.getName()}($one ? $ParamStr : \"\");\n break;\n"
+            SwitchStr += "case ${mBusInfo.eventIds.get(i)}:${method.getName()}(" + (one ? ParamStr : "") + ");\n break;\n"
         }
         String m = SwitchStr + "}\n}"
         mBusInfo.project.logger.quiet m

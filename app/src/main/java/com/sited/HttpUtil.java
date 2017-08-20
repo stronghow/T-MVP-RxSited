@@ -65,31 +65,30 @@ public class HttpUtil {
                     builder.get();
                 }
                 Request request = builder.build();
-                RxSource.getHttpClient().newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (response.isSuccessful()) {
-                            KLog.json("HttpUtil-RequestHeader", request.headers().toString());
-                            KLog.json("HttpUtil-ResponseHeader", response.headers().toString());
-                            s.onNext(new String(response.body().bytes(), msg.getEncode()));
-                            s.onComplete();
-                            response.close();
-                        }else{
-                            s.onNext("[]");
-                            s.onComplete();
-                            response.close();
-                        }
-                    }
-                });
-//                String html = getResponseBody(App.getHttpClient(), builder.build(), msg.getEncode());
-//                s.onNext(html);
+//                RxSource.getHttpClient().newCall(request).enqueue(new Callback() {
+//                    @Override
+//                    public void onFailure(Call call, IOException e) {
 //
-//                s.onComplete();
+//                    }
+//
+//                    @Override
+//                    public void onResponse(Call call, Response response) throws IOException {
+//                        if (response.isSuccessful()) {
+//                            KLog.json("HttpUtil-RequestHeader", request.headers().toString());
+//                            KLog.json("HttpUtil-ResponseHeader", response.headers().toString());
+//                            s.onNext(new String(response.body().bytes(), msg.getEncode()));
+//                            s.onComplete();
+//                            response.close();
+//                        }else{
+//                            s.onNext("[]");
+//                            s.onComplete();
+//                            response.close();
+//                        }
+//                    }
+//                });
+                String html = getResponseBody(RxSource.getHttpClient(), request, msg.getEncode());
+                s.onNext(html);
+                s.onComplete();
             }
         }).subscribeOn(Schedulers.io());
     }
@@ -120,12 +119,12 @@ public class HttpUtil {
 
             @Override
             public LinkedHashMap<String, String> getHeaders() {
-                return new LinkedHashMap<>();
+                return new LinkedHashMap<>(0);
             }
 
             @Override
             public LinkedHashMap<String, String> getParams() {
-                return new LinkedHashMap<>();
+                return new LinkedHashMap<>(0);
             }
         };
     }

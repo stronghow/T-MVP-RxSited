@@ -51,11 +51,7 @@ public class SearchFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(tRecyclerView == null) tRecyclerView();
-        if(!oldkey.equals(key)){
-            oldkey = key;
-            tRecyclerView.reFetch();
-        }
+        reFetch();
     }
 
     public AdapterPresenter getPresenter(){
@@ -63,20 +59,19 @@ public class SearchFragment extends Fragment {
     }
 
     public void updateData(String key){
+        this.key = key;
         if(tRecyclerView == null){
             tRecyclerView();
         }else {
             tRecyclerView.getPresenter()
                     .setParam(C.KEY, key)
                     .setNo_MORE(true);
-            this.key = key;
-            //tRecyclerView.reFetch();
         }
     }
 
     public void reFetch(){
         if(tRecyclerView == null) tRecyclerView();
-        if(!oldkey.equals(key)){
+        else if(!oldkey.equals(key)){
             oldkey = key;
             tRecyclerView.reFetch();
         }
@@ -103,6 +98,7 @@ public class SearchFragment extends Fragment {
                 .setParam(C.URL,url)
                 .setParam(C.SOURCE,rxSource)
                 .setNo_MORE(true);
+        oldkey = key;
         tRecyclerView.reFetch();
     }
 

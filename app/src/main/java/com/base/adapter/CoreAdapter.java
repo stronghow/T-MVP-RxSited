@@ -78,6 +78,7 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
     }
 
     public void setTypeSelector(TypeSelector<M> mTypeSelector) {
+        KLog.json("setTypeSelector");
         this.mTypeSelector = mTypeSelector;
         this.viewType = FLAG_MULTI_VH;
     }
@@ -130,19 +131,19 @@ public class CoreAdapter<M> extends RecyclerView.Adapter<BaseViewHolder>{
         notifyDataSetChanged();
     }
 
-    public void setBeans(List<M> data, int begin) {
+    public void setBeans(List<M> data, int page) {
         if (data == null) {
             this.isHasMore = false;
             return;
         }
-        KLog.json("setBeans::begin="+begin);
-        this.isHasMore = (data.size() > 0 && begin > 0);
+        KLog.json("setBeans::page="+page);
+        this.isHasMore = (data.size() > 0 && page > 0);
         if(isRefetch) {
             this.mItemList = data;
             isRefetch = false;
         }
         else this.mItemList.addAll(data);
-//        if (begin > 1) this.mItemList.addAll(data);
+//        if (page > 1) this.mItemList.addAll(data);
 //        else this.mItemList = data;
         notifyDataSetChanged();
     }

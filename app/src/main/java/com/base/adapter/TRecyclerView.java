@@ -43,7 +43,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     private int headType, footType, itemType, spanCount;
     private int lastVisibleItem,total;
     private SimpleDateFormat ft = new SimpleDateFormat("HH:mm", Locale.getDefault());
-    private int begin;
+    private int page;
     private SparseIntArray Type_SpanCount = new SparseIntArray();
     private SparseIntArray Pos_SpanCount = new SparseIntArray(); //减少setSpanSizeLookup的多次重复回调所带来的计算
     private int MaxSpanCount = 1;
@@ -122,7 +122,7 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
                         && lastVisibleItem + 1 == recyclerview.getAdapter().getItemCount()
                         && mCommAdapter.isHasMore
                         && !mCoreAdapterPresenter.isRefreshing()
-                        && mCoreAdapterPresenter.getBegin() > 0 ) {
+                        && mCoreAdapterPresenter.getPage() > 0 ) {
                     KLog.json("onScrollStateChanged::fetch");
                     mCoreAdapterPresenter.fetch();
                 }
@@ -264,9 +264,9 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
 
     public void reFetch() {
         mCommAdapter.isRefetch = true;
-        begin--;
-        if(begin > 0) begin = 0;
-        mCoreAdapterPresenter.setBegin(begin);
+        page--;
+        if(page > 0) page = 0;
+        mCoreAdapterPresenter.setPage(page);
         swipeRefresh.setRefreshing(true);
         mCoreAdapterPresenter.fetch_Net();
     }
@@ -281,11 +281,11 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
     }
 
     @Override
-    public void setData(List data, int begin) {
-        this.begin = begin;
+    public void setData(List data, int page) {
+        this.page = page;
         swipeRefresh.setRefreshing(false);
-        mCommAdapter.setBeans(data, begin);
-        if ((begin <= 1)&&(data == null || data.size() == 0)) {
+        mCommAdapter.setBeans(data, page);
+        if ((page <= 1)&&(data == null || data.size() == 0)) {
             KLog.json("setEmpty");
             setEmpty();
         }
@@ -295,11 +295,11 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
 
 //    //@DbRealm
 //    @Override
-//    public void setNetData(List data, int begin) {
-//        this.begin = begin;
+//    public void setNetData(List data, int page) {
+//        this.page = page;
 //        swipeRefresh.setRefreshing(false);
-//        mCommAdapter.setBeans(data, begin);
-//        if ((begin <= 1)&&(data == null || data.size() == 0)) {
+//        mCommAdapter.setBeans(data, page);
+//        if ((page <= 1)&&(data == null || data.size() == 0)) {
 //            KLog.json("setEmpty");
 //            setEmpty();
 //        }
@@ -309,11 +309,11 @@ public class TRecyclerView<M> extends FrameLayout implements AdapterPresenter.IA
 
 
 //    @Override
-//    public void setDBData(List data,int begin) {
-//        this.begin = begin;
+//    public void setDBData(List data,int page) {
+//        this.page = page;
 //        swipeRefresh.setRefreshing(false);
-//        mCommAdapter.setBeans(data, begin);
-//        if ((begin <= 1)&&(data == null || data.size() == 0))
+//        mCommAdapter.setBeans(data, page);
+//        if ((page <= 1)&&(data == null || data.size() == 0))
 //            setEmpty();
 //        else if (isReverse)
 //            recyclerview.scrollToPosition(mCommAdapter.getItemCount() - data.size() - 2);

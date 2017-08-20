@@ -3,6 +3,7 @@ import com.app.plugin.JavassistPlugin
 
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
+//apply plugin: 'android-aspectjx'
 //apply plugin: 'me.tatarka.retrolambda'
 
 //应用android-apt插件

@@ -1,6 +1,9 @@
 package com.sited;
+import android.text.TextUtils;
+
 import org.dom4j.Attribute;
 import org.dom4j.Element;
+import org.dom4j.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,25 +38,13 @@ public class RxNodeSet implements IRxNode {
     }
 
     public RxNodeSet build(){
-        items = new ArrayList<>();
-        if(node.elements().size()>0) {
-            for (Element element : node.elements()) {
-                RxNode rxNode = new RxNode(rxSource);
-                for (Attribute attr : element.attributes()) {
-                    //System.out.println("key = " + attr.getName() +" value = " + attr.getValue());
-                    rxNode.attrs.set(attr.getName(), attr.getValue());
-                }
-                rxNode.build();
-                items.add(rxNode);
-            }
-        }else{
-            RxNode rxNode = new RxNode(rxSource);
-            for (Attribute attr : node.attributes()) {
-                rxNode.attrs.set(attr.getName(), attr.getValue());
-            }
-            rxNode.build();
-            items.add(rxNode);
-        }
+        items = RxNodeHelp.buildNodeSet(rxSource,node);
+        return this;
+    }
+
+    //book
+    public RxNodeSet build(String ChildrenName){
+        items = RxNodeHelp.buildNodeSet(rxSource,node,ChildrenName);
         return this;
     }
 
@@ -63,24 +54,25 @@ public class RxNodeSet implements IRxNode {
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return items == null || items.size() == 0;
     }
 
     @Override
     public RxNode nodeMatch(String url) {
         if(items.size()==1) return items.get(0);
         for(RxNode rxNode : items){
-            if(rxNode.attrs.getString("expr")==null)
-                continue;
-            if(url.matches(rxNode.attrs.getString("expr")))
-                return rxNode;
+            String expr = rxNode.attrs.getString("expr");
+            if(!TextUtils.isEmpty(expr)) {
+                if (url.matches(expr))
+                    return rxNode;
+            }
         }
         return items.get(0);
     }
 
     @Override
     public String nodeName() {
-        return null;
+        return node.getName();
     }
 
     @Override

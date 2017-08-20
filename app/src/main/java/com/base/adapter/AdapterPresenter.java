@@ -27,7 +27,7 @@ public class AdapterPresenter<M> {
     private NetRepository<M> mNetRepository;//仓库
     private HashMap<String, Object> param = new HashMap<>();//设置远程网络仓库钥匙
     private DbRepository<M> mDbRepository;
-    private int begin = 0;
+    private int page = 0;
     private final IAdapterView<M> view;
 //    private boolean isCACHE_NETWORK; //缓存和网络一起
     private boolean Refreshing = false;
@@ -39,11 +39,11 @@ public class AdapterPresenter<M> {
     interface IAdapterView<M> {
         void setEmpty();
 
-//        void setNetData(List<M> data, int begin);
+//        void setNetData(List<M> data, int page);
 //
-//        void setDBData(List<M> data, int begin);
+//        void setDBData(List<M> data, int page);
 
-        void setData(List<M> data, int begin);
+        void setData(List<M> data, int page);
 
         void reSetEmpty();
     }
@@ -69,6 +69,11 @@ public class AdapterPresenter<M> {
         return this;
     }
 
+    public AdapterPresenter<M> setDbRepository(DbRepository<M> mDbRepository) {
+        this.mDbRepository = mDbRepository;
+        return this;
+    }
+
 
     public AdapterPresenter<M> setParam(HashMap<String, Object> param) {
         this.param = param;
@@ -80,24 +85,19 @@ public class AdapterPresenter<M> {
         return this;
     }
 
-    public AdapterPresenter<M> setDbRepository(DbRepository<M> mDbRepository) {
-        this.mDbRepository = mDbRepository;
-        return this;
-    }
-
     public AdapterPresenter<M> setNo_MORE(boolean isNo_MORE) {
-        if(isNo_MORE) this.begin = NO_MORE;
+        if(isNo_MORE) this.page = NO_MORE;
         return this;
     }
 
-    public AdapterPresenter<M> setBegin(int begin) {
-        KLog.json("begin=" + begin);
-        this.begin = begin;
+    public AdapterPresenter<M> setPage(int page) {
+        KLog.json("page=" + page);
+        this.page = page;
         return this;
     }
 
-    public int getBegin() {
-        return this.begin;
+    public int getPage() {
+        return this.page;
     }
 
 //    public AdapterPresenter setLoadDataMethod(boolean isCACHE_NETWORK){
@@ -126,22 +126,22 @@ public class AdapterPresenter<M> {
 
 
     private void getData() {
-        begin++;
-        param.put(C.PAGE, begin);
+        page++;
+        param.put(C.PAGE, page);
         if (mDbRepository != null) {
             mDbSubscription = mDbRepository
                     .getData(param)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(r -> {
                                 if (r == null || r.size() == 0) {
-                                    begin--; //抵消前面的begin++
+                                    page--; //抵消前面的page++
                                     getNetData();
                                 } else {
                                     Refreshing = false;
                                     KLog.json("getDbData()");
                                     if(dataFromListener != null)
                                         dataFromListener.Call(false);
-                                    view.setData(r, begin);
+                                    view.setData(r, page);
                                 }
                             },
                             err -> getNetData(),
@@ -152,15 +152,15 @@ public class AdapterPresenter<M> {
                             });
         }
         else {
-            begin--;
+            page--;
             getNetData();
         }
     }
 
     private void getNetData() {
         Refreshing = true;
-        begin++;
-        param.put(C.PAGE, begin);
+        page++;
+        param.put(C.PAGE, page);
         KLog.json("getNetData");
         if(mNetRepository != null && NetWorkUtil.isNetConnected(App.getContext()))
             mNetSubscription = mNetRepository
@@ -169,7 +169,7 @@ public class AdapterPresenter<M> {
                     .subscribe(res -> {
                                 if(dataFromListener != null)
                                     dataFromListener.Call(true);
-                                view.setData(res, begin);
+                                view.setData(res, page);
                         },
                             err -> { Refreshing = false;err.printStackTrace();},
                             ()-> {
@@ -177,7 +177,7 @@ public class AdapterPresenter<M> {
                                 if(mNetSubscription != null && !mNetSubscription.isDisposed())
                                     mNetSubscription.dispose();
                             });
-        else view.setData(null,begin);
+        else view.setData(null,page);
     }
 
     public void unsubscribe(){

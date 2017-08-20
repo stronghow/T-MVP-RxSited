@@ -1,0 +1,18 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="item"
+            type="com.model.dtype2" />
+    </data>
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="?attr/backgroundCard"
+        android:text="@{item.d}"
+        android:textColor="?attr/textColor"
+        android:textSize="20sp"
+        />
+</layout>

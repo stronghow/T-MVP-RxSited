@@ -67,10 +67,10 @@ public class MainActivity extends BaseActivity<MainPresenter,ActivityMainBinding
                 RxSource rxSource;
                 rxSource = RxSource.get(item.url);
                 if(rxSource == null) rxSource = RxSourceApi.getRxSource(item.sited);
-                if(rxSource.tags == null) {
-                    ToastUtil.show("对不起,暂时不支持无Tags节点的插件:)");
-                    return;
-                }
+//                if(rxSource.tags == null) {
+//                    ToastUtil.show("对不起,暂时不支持无Tags节点的插件:)");
+//                    return;
+//                }
                 RouterHelper.go(C.TAG, DataExtra.create()
                         .add(C.SOURCE, rxSource)
                         .add(C.URL,item.url).build());

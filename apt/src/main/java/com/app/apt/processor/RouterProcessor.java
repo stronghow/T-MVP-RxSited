@@ -43,17 +43,17 @@ public class RouterProcessor implements IProcessor {
         TypeSpec.Builder tb = classBuilder(CLASS_NAME).addModifiers(PUBLIC, FINAL).addJavadoc("@ 全局路由器 此类由apt自动生成");
 
         FieldSpec extraField = FieldSpec.builder(ParameterizedTypeName.get(HashMap.class, String.class,Object.class), "mCurActivityExtra")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                 .build();
         tb.addField(extraField);
 
-        MethodSpec.Builder methodBuilder1 = MethodSpec.methodBuilder("go")
+        MethodSpec.Builder methodBuilder_go = MethodSpec.methodBuilder("go")
                 .addJavadoc("@此方法由apt自动生成")
                 .addModifiers(PUBLIC, STATIC)
                 .addParameter(String.class, "name").addParameter(HashMap.class, "extra")
                 .addParameter(ClassName.get("android.view", "View"), "view");
 
-        MethodSpec.Builder methodBuilder2 = MethodSpec.methodBuilder("bind")
+        MethodSpec.Builder methodBuilder_bind = MethodSpec.methodBuilder("bind")
                 .addJavadoc("@此方法由apt自动生成")
                 .addModifiers(PUBLIC, STATIC)
                 .addParameter(ClassName.get("android.app", "Activity"), "mContext");
@@ -93,7 +93,7 @@ public class RouterProcessor implements IProcessor {
                 }
                 mRouterActivityModel.setExtraElementKeys(mExtraElementKeys);
                 mRouterActivityModel.setExtraElements(mExtraElements);
-                boolean isNeedBind = (mExtraElementKeys != null && mExtraElementKeys.size() > 0
+                boolean isNeedBind = (mExtraElementKeys.size() > 0
                         || mRouterActivityModel.getSceneTransitionElement() != null);
                 mRouterActivityModel.setNeedBind(isNeedBind);
                 mRouterActivityModels.add(mRouterActivityModel);
@@ -108,16 +108,20 @@ public class RouterProcessor implements IProcessor {
                 if (item.getExtraElements() != null && item.getExtraElements().size() > 0) {
                     for (int i = 0; i < item.getExtraElements().size(); i++) {
                         Element mFiled = item.getExtraElements().get(i);
-                        blockBuilderBind.add("(($T)mContext)." +//1
-                                        "$L" +//2
-                                        "= ($T) " +//3
-                                        "mCurActivityExtra.get(" +//4
-                                        "$S);\n",//5
-                                item.getElement(),//1
-                                mFiled,//2
-                                mFiled,//3
-                                item.getExtraElementKeys().get(i)//5
-                        );//5
+                        blockBuilderBind.add("(($T)mContext).$L = ($T)mCurActivityExtra.get($S);\n"
+                                                ,item.getElement()
+                                                ,mFiled
+                                                ,mFiled
+                                                ,item.getExtraElementKeys().get(i));
+//                        blockBuilderBind.add("(($T)mContext)." +//1
+//                                        "$L" +//2
+//                                        "= ($T) " +//3
+//                                        "mCurActivityExtra.get($S);\n",//5
+//                                item.getElement(),//1
+//                                mFiled,//2
+//                                mFiled,//3
+//                                item.getExtraElementKeys().get(i)//5
+//                        );//5
                     }
                 }
                 if (item.getSceneTransitionElement() != null) {
@@ -155,13 +159,13 @@ public class RouterProcessor implements IProcessor {
             }
             blockBuilderGo.addStatement("default: break");
             blockBuilderGo.endControlFlow();
-            methodBuilder1.addCode(blockBuilderGo.build());
+            methodBuilder_go.addCode(blockBuilderGo.build());
             blockBuilderBind.addStatement("default: break");
             blockBuilderBind.endControlFlow();
-            methodBuilder2.addCode(blockBuilderBind.build());
+            methodBuilder_bind.addCode(blockBuilderBind.build());
 
-            tb.addMethod(methodBuilder1.build());
-            tb.addMethod(methodBuilder2.build());
+            tb.addMethod(methodBuilder_go.build());
+            tb.addMethod(methodBuilder_bind.build());
 
             //增加go(action)和go(action,extra):两个重载方法
             tb.addMethod(MethodSpec.methodBuilder("go")

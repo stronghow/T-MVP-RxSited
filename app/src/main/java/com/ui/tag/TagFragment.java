@@ -10,15 +10,20 @@ import android.view.ViewGroup;
 import com.C;
 import com.DbFactory;
 import com.NetFactory;
+import com.SitedManage;
 import com.base.adapter.AdapterPresenter;
 import com.base.adapter.BaseViewHolder;
 import com.base.adapter.TRecyclerView;
 import com.base.entity.DataExtra;
 import com.base.util.helper.RouterHelper;
+import com.model.Section;
+import com.model.Sections;
 import com.model.Tag;
 import com.model.Tags;
 import com.sited.RxSource;
 import com.ui.main.R;
+
+import java.util.ArrayList;
 
 
 /**
@@ -49,10 +54,24 @@ public class TagFragment extends Fragment {
                 @Override
                 public void onItemClick(View view, int postion) {
                     Tag item = (Tag) tRecyclerView.getCoreAdapter().getItem(postion);
-                    RouterHelper.go(C.BOOK1, DataExtra.create()
-                                                    .add(C.MODEL,item)
-                                                    .add(C.SOURCE,source)
-                                                    .build(),view.findViewById(R.id.image));
+                    SitedManage.databind databind = SitedManage.getDataBind(source.getBook(item.url).dtype);
+                    if(databind.isGoBook) {
+                        RouterHelper.go(C.BOOK1, DataExtra.create()
+                                .add(C.MODEL, item)
+                                .add(C.SOURCE, source)
+                                .build(), view.findViewById(R.id.image));
+                    }else{
+                        Sections sections = new Sections();
+                        sections.name  = item.name;
+                        sections.bookUrl = item.url;
+                        sections.url = item.url;
+                        RouterHelper.go(C.SECTION1, DataExtra.create()
+                                .add(C.MODEL, sections)
+                                .add(C.SOURCE, source)
+                                .add(C.INDEX,0)
+                                .add(C.SECTIONS,new ArrayList<Sections>(0))
+                                .build());
+                    }
                 }
             });
             tRecyclerView.getPresenter()

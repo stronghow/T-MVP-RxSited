@@ -33,7 +33,6 @@ public class RxSourceApi {
         return source;
     }
 
-    @MemoryCache
     public static RxSource getRxSource(String xml){
         try {
             RxSource source = new RxSource();

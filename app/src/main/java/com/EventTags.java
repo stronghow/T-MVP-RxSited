@@ -15,5 +15,6 @@ public interface EventTags {
      * sited
      */
     int SECTION_PAGE = 0x0001;
+    int SET_BOOKNAME  = 0x0002;
     int CURRENT_ITEM = 0x0005;
 }

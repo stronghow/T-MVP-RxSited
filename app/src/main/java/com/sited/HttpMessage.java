@@ -17,37 +17,24 @@ public class HttpMessage implements HttpMsg{
     //可由cfg实始化
     private String encode;
     private String method;
-    private String ua;
     
     public HttpMessage(RxNode config, String url){
         this.cfg = config;
         this.url = url;
-        rebuild(null);
+        build();
     }
 
-    private void rebuild(final RxNode config) {
-        if (config != null) {
-            this.cfg = config;
-        }
-        encode = this.cfg.encode;
-        method = this.cfg.method;
-        ua = this.cfg.ua;
-
-
-        headers = this.cfg.getHeader(url);
-        if(headers==null){
-            headers = new LinkedHashMap<>();
-        }
-
-        //headers.put(HttpHeaders.HEAD_KEY_CONTENT_TYPE,"text/html; charset="+encode);
-        headers.put("User-Agent", ua);
-        headers.put("Referer", url);
+    private void build() {
+        encode = cfg.encode;
+        method = cfg.method;
 
         rebuildUrl();
+
+        headers = cfg.getHeader(url);
     }
 
     private void rebuildUrl() {
-        if (url.startsWith("POST::")) {
+        if (url.startsWith("POST::")||method.equals("post")) {
             url = url.replace("POST::", "");
             method = "post";
             params = cfg.getParam(url);
@@ -61,8 +48,7 @@ public class HttpMessage implements HttpMsg{
 
     @Override
     public String getEncode() {
-        KLog.json(encode);
-        return encode==null ? "UTF-8":encode;
+        return encode;
     }
 
     @Override
@@ -82,6 +68,7 @@ public class HttpMessage implements HttpMsg{
 
     @Override
     public String getUrl() {
+        KLog.json("url ==> " + url);
         return url;
     }
 }

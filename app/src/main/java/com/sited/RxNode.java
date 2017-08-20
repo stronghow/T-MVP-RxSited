@@ -28,7 +28,7 @@ public class RxNode implements IRxNode {
 
 
     public RxAttributeList attrs = new RxAttributeList();
-    public String staticData = null;
+    public String staticData = "[]";
 
     //build
     protected String buildArgs;
@@ -41,16 +41,17 @@ public class RxNode implements IRxNode {
     //parse
     protected String parse; //解析函数
     protected String parseUrl; //解析出真正在请求的Url
+    boolean isParse = false;
 
     @Override
     public int nodeType() {
-        return 0;
+        return 1;
     }
 
 
     @Override
     public RxNode nodeMatch(String url) {
-        return null;
+        return this;
     }
 
     @Override
@@ -70,16 +71,25 @@ public class RxNode implements IRxNode {
     public void build(){
         this.title    = attrs.getString("title");//可能为null
         this.url = attrs.getString("url");
-        this.encode = attrs.getString("encode");
-        if(TextUtils.isEmpty(this.encode)) this.encode = rxSource.encode;
+        this.encode = attrs.getString("encode",rxSource.encode);
+//        if(TextUtils.isEmpty(this.encode)){
+//            this.encode = rxSource.encode;
+//            //attrs.set("encode",this.encode);
+//        }
 
-        this.ua = attrs.getString("ua");
-        if(TextUtils.isEmpty(this.ua)) this.ua = rxSource.getUa();
+        this.ua = attrs.getString("ua",rxSource.ua);
+//        if(TextUtils.isEmpty(this.ua)){
+//            this.ua = rxSource.ua;
+//            //attrs.set("ua",this.ua);
+//        }
 
         this.args = attrs.getString("args");
         this.header = attrs.getString("header");
-        this.dtype = attrs.getInt("dtype");
-        if(this.dtype == 0) this.dtype = rxSource.dtype;
+        this.dtype = attrs.getInt("dtype",rxSource.dtype);
+//        if(this.dtype == 0){
+//            this.dtype = rxSource.dtype;
+//            //attrs.set("dtype",""+this.dtype);
+//        }
 
         this.method = attrs.getString("method","get");
         this.addKey = attrs.getString("addKey");
@@ -93,50 +103,35 @@ public class RxNode implements IRxNode {
         this.buildWeb = attrs.getString("buildWeb");
         this.parseUrl = attrs.getString("parseUrl");
         this.parse    = attrs.getString("parse");
-    }
 
-    public LinkedHashMap<String, String> getHeader(String url) {
-        if(!TextUtils.isEmpty(header)) return getMap(header);
-        else if(!TextUtils.isEmpty(buildHeader)) return getMap(rxSource.callJs(buildHeader,url));
-        else return null;
-    }
-
-//    public LinkedHashMap<String,String> getHeader(final String data) {
-//        return getMap(data);
-//    }
-
-    public LinkedHashMap<String, String> getParam(String url) {
-        if(!TextUtils.isEmpty(args)) return getMap(args);
-        else if(!TextUtils.isEmpty(buildArgs)) return getMap(rxSource.callJs(buildArgs,url));
-        else return null;
-    }
-
-//    public LinkedHashMap<String,String> getParam(final String data) {
-//        return getMap(data);
-//    }
-
-    private LinkedHashMap<String,String> getMap(final String data){
-        if (!TextUtils.isEmpty(data)) {
-            if (rxSource.engine < 34) {
-                return StringtoMap(data, ";", "=");
-            } else {
-                return StringtoMap(data, "\\$\\$", ":");//new
-            }
-        }
-        return null;
-    }
-
-    private LinkedHashMap<String,String> StringtoMap(final String str, final String sp1, final String sp2) {
-        LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        for (String kv : str.split(sp1)) {
-            String[] item = kv.split(sp2);
-            if (item.length == 2)
-                map.put(item[0].trim(), item[1].trim());
-        }
-        return map;
+        isParse = !(TextUtils.isEmpty(parseUrl) && TextUtils.isEmpty(parse));
     }
 
     public RxSource getRxSource() {
         return rxSource;
+    }
+
+    public LinkedHashMap<String, String> getHeader(String url) {
+        LinkedHashMap<String, String> headerMap = new LinkedHashMap<>();
+        if(!TextUtils.isEmpty(header)) headerMap.putAll(RxNodeHelp.getMap(header,rxSource.engine));
+        if(!TextUtils.isEmpty(buildHeader)) headerMap.putAll(RxNodeHelp.getMap(rxSource.callJs(buildHeader,url),rxSource.engine));
+
+        if(!TextUtils.isEmpty(buildRef)) headerMap.put("Referer", rxSource.callJs(buildRef,url));
+        else headerMap.put("Referer",url);
+
+        headerMap.put("User-Agent", ua);
+
+        return headerMap;
+    }
+
+    public LinkedHashMap<String, String> getParam(String url) {
+        LinkedHashMap<String, String> headerMap = new LinkedHashMap<>();
+        if(!TextUtils.isEmpty(args)) headerMap.putAll(RxNodeHelp.getMap(args,rxSource.engine));
+        if(!TextUtils.isEmpty(buildArgs))  headerMap.putAll(RxNodeHelp.getMap(rxSource.callJs(buildArgs,url),rxSource.engine));
+        return headerMap;
+    }
+
+    public boolean canParse(){
+        return isParse;
     }
 }

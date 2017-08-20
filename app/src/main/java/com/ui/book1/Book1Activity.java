@@ -2,6 +2,7 @@ package com.ui.book1;
 
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import com.C;
@@ -31,6 +32,7 @@ import com.ui.main.R;
 import com.ui.main.databinding.ActivitySitedBookBinding;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -52,12 +54,7 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
     @SceneTransition(C.TRANSLATE_VIEW)
     public ImageView image;
 
-
-    private boolean isResume = false;
-    
     private List<Sections> sectionsList;
-
-    private List<Sections> reverse_sectionsList;
     
     private int index, page;
     private int oldIndex;
@@ -66,6 +63,7 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
     @Bus(EventTags.SECTION_PAGE)
     public void setPage(int page){
         this.page = page;
+        update();
     }
 
     @Override
@@ -90,10 +88,7 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
                     public void Call(Boolean isFromNet) {
                         if(isFromNet) oldIndex = 0;
                         else {
-                            LookModel lookModel = Realm.getDefaultInstance()
-                                    .where(LookModel.class)
-                                    .equalTo(C.QueryKey,model.url)
-                                    .findFirst();
+                            LookModel lookModel = SiteDbApi.getLastLook(model.url);
                             if(lookModel != null){
                                 oldIndex = lookModel.index;
                             }
@@ -103,13 +98,15 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
         mViewBinding.listItem.getCoreAdapter().setOnItemClickListener(new BaseViewHolder.ItemClickListener() {
             @Override
             public void onItemClick(View view, int postion) {
-                //ToastUtil.show(""+postion);
-                //KLog.json("book::position = " + postion);
-                List<Sections> sectionsList = (ArrayList<Sections>) mViewBinding.listItem.getCoreAdapter().getItemList();
+                if(sectionsList == null) {
+                     sectionsList = mViewBinding.listItem.getCoreAdapter().getItemList();
+                }
                 Sections item =  sectionsList.get(postion);
-                index = item.index;
+                //index = item.index;
+                index = postion;
                 RouterHelper.go(C.SECTION1,DataExtra.create()
                         .add(C.MODEL,item)
+                        .add(C.INDEX,index)
                         .add(C.SOURCE,rxSource)
                         .add(C.SECTIONS,sectionsList)
                         .build());
@@ -120,39 +117,52 @@ public class Book1Activity extends BaseActivity<Book1Presenter,ActivitySitedBook
             public void onClick(View view) {
                 oldIndex = sectionsList.size() - oldIndex -1;
                 newIndex = sectionsList.size() - newIndex -1;
-                NetFactory.reverse(sectionsList);
+                reverse(sectionsList);
                 mViewBinding.listItem.getCoreAdapter().notifyDataSetChanged();
             }
         });
     }
 
     @Override
-    protected void onResume() {
-        KLog.json("onResume");
-        super.onResume();
-        if(isResume){  //newIndex != oldIndex
-            Sections model = sectionsList.get(index + page);
-            newIndex = model.index;
-            sectionsList.get(newIndex).isLook = true;
-            sectionsList.get(oldIndex).isLook = false;
-            mViewBinding.listItem.getCoreAdapter().notifyItemChanged(oldIndex);
-            mViewBinding.listItem.getCoreAdapter().notifyItemChanged(newIndex);
-            SiteDbApi.updateLastlook(sectionsList.get(oldIndex), sectionsList.get(newIndex));
-            oldIndex  = newIndex; //更新之后，原来新的位置变成了旧的
-            mViewBinding.listItem.moveToposition(newIndex);
-        }else{
-            //监听recycleview渲染完毕
-            mViewBinding.listItem.getViewTreeObserver().addOnGlobalLayoutListener(()->{
-                if(!isResume && mViewBinding.listItem.hasFocus())
-                    Flowable.timer(500, TimeUnit.MILLISECONDS)
-                    .compose(RxSchedulers.io_main())
-                    .subscribe(t ->{
-                        mViewBinding.listItem.moveToposition(oldIndex);
-                        isResume = true;
-                    });
+    public void initEven() {
+        mViewBinding.listItem.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if(mViewBinding.listItem.hasFocus()){
+                    mViewBinding.listItem.moveToposition(oldIndex);
+                    mViewBinding.listItem.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                    Flowable.timer(500, TimeUnit.MILLISECONDS)
+//                            .compose(RxSchedulers.io_main())
+//                            .subscribe(t ->{
+//                                mViewBinding.listItem.moveToposition(oldIndex);
+//                                mViewBinding.listItem.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                            });
+                }
+            }
+        });
+    }
 
-            });
-        }
+    private void update(){
+//        Sections model = sectionsList.get(index + page);
+//        newIndex = model.index;
+        newIndex = index + page;
+        Sections oldSec = sectionsList.get(oldIndex);
+        Sections newSec = sectionsList.get(newIndex);
+        oldSec.isLook = false;
+        newSec.isLook = true;
+        mViewBinding.listItem.getCoreAdapter().notifyItemChanged(oldIndex);
+        mViewBinding.listItem.getCoreAdapter().notifyItemChanged(newIndex);
+        SiteDbApi.updateLastLook(oldSec, newSec, newIndex);
+        oldIndex = newIndex; //更新之后，原来新的位置变成了旧的
+
+        mViewBinding.listItem.moveToposition(newIndex);
+    }
+
+    private void reverse(List<Sections> sectionsList){
+        Collections.reverse(sectionsList);
+//        for(int i=0; i< sectionsList.size();i++){
+//            sectionsList.get(i).index = i;
+//        }
     }
 
     @Override

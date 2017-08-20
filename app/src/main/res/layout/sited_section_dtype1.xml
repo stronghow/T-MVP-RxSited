@@ -1,0 +1,16 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="item"
+            type="com.model.dtype1" />
+    </data>
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:background="?attr/backgroundCard"
+        app:fiximageUrl="@{item.url}"
+        app:refUrl="@{item.QueryKey}"
+        />
+</layout>
